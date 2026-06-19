@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#2b6cb0" />
+<title>Flight School Path</title>
+<style>
+  :root{
+    --sky:#3b82f6;
+    --sky-deep:#2563eb;
+    --sun:#f59e0b;
+    --sun-deep:#ea580c;
+    --ink:#1e293b;
+    --muted:#64748b;
+    --line:#e2e8f0;
+    --card:#ffffff;
+    --bg-top:#eaf4ff;
+    --bg-bot:#f7fbff;
+    --good:#16a34a;
+    --prog:#f59e0b;
+    --radius:16px;
+    --shadow:0 6px 22px rgba(30,58,95,.08);
+    --shadow-sm:0 2px 8px rgba(30,58,95,.06);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink);
+    background:linear-gradient(180deg,var(--bg-top),var(--bg-bot)) fixed;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:0 16px 80px}
+
+  /* Header */
+  header.hero{
+    text-align:center;
+    padding:34px 16px 22px;
+    background:linear-gradient(135deg,#dbeafe,#eff6ff 60%,#fef3c7);
+    border-bottom:1px solid var(--line);
+  }
+  .hero .plane{font-size:40px;line-height:1;margin-bottom:4px}
+  .hero h1{margin:0;font-size:1.9rem;letter-spacing:-.02em}
+  .hero p.sub{margin:8px auto 0;max-width:460px;color:var(--muted);font-size:.98rem}
+
+  /* Overall progress */
+  .overall{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:18px;
+    margin:18px 0 10px;
+  }
+  .overall .row{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+  .overall h2{margin:0;font-size:1.05rem}
+  .overall .pct{font-weight:800;font-size:1.35rem;color:var(--sun-deep)}
+  .bar{height:12px;border-radius:99px;background:#eef2f7;overflow:hidden;margin-top:10px}
+  .bar>span{display:block;height:100%;width:0;border-radius:99px;
+    background:linear-gradient(90deg,var(--sun),var(--sun-deep));transition:width .45s ease}
+  .overall .count{color:var(--muted);font-size:.85rem;margin-top:8px}
+  .encourage{margin:10px 0 0;font-size:.9rem;color:var(--good);font-weight:600;min-height:1.2em}
+
+  /* Note banner */
+  .banner{
+    background:#fffaf0;border:1px solid #fde7c2;border-left:4px solid var(--sun);
+    border-radius:12px;padding:12px 14px;margin:14px 0;font-size:.9rem;color:#7c4a03;
+  }
+  .banner strong{color:#92400e}
+
+  /* Toolbar */
+  .toolbar{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 6px}
+  .toolbar button{
+    flex:1 1 auto;min-width:120px;border:1px solid var(--line);background:var(--card);
+    color:var(--ink);padding:10px;border-radius:12px;font-weight:600;font-size:.85rem;
+    cursor:pointer;box-shadow:var(--shadow-sm);display:flex;align-items:center;justify-content:center;gap:6px;
+    transition:transform .08s ease,background .15s ease;
+  }
+  .toolbar button:hover{background:#f1f6fc}
+  .toolbar button:active{transform:scale(.97)}
+  .toolbar button.danger{color:#b91c1c;border-color:#fecaca;background:#fff5f5}
+
+  /* Quick nav */
+  nav.jump{display:flex;gap:8px;overflow-x:auto;padding:10px 0 4px;margin-bottom:4px;
+    -webkit-overflow-scrolling:touch;scrollbar-width:thin}
+  nav.jump a{flex:0 0 auto;text-decoration:none;color:var(--sky-deep);background:#e7f0fe;
+    padding:7px 12px;border-radius:99px;font-size:.8rem;font-weight:700;white-space:nowrap}
+  nav.jump a:active{background:#d6e6fd}
+
+  /* Sections */
+  section.block{margin-top:26px;scroll-margin-top:12px}
+  .sec-head{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+  .sec-head .ico{font-size:1.3rem}
+  .sec-head h2{margin:0;font-size:1.25rem;letter-spacing:-.01em}
+  .sec-sub{color:var(--muted);font-size:.9rem;margin:0 0 10px}
+  .sec-prog{display:flex;align-items:center;gap:10px;margin:8px 0 14px}
+  .sec-prog .bar{flex:1;margin:0;height:8px}
+  .sec-prog .bar>span{background:linear-gradient(90deg,var(--sky),var(--sky-deep))}
+  .sec-prog .lbl{font-size:.78rem;color:var(--muted);font-weight:700;white-space:nowrap}
+
+  /* Cards */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow-sm);padding:16px;margin-bottom:14px}
+  .card h3{margin:0 0 4px;font-size:1.05rem}
+  .card .meta{font-size:.78rem;color:var(--muted);margin:0 0 8px;display:flex;flex-wrap:wrap;gap:6px}
+  .pill{background:#eef4fb;color:var(--sky-deep);border-radius:99px;padding:2px 9px;font-weight:700}
+  .pill.amount{background:#fff4e1;color:var(--sun-deep)}
+  .card p.desc{margin:6px 0;font-size:.92rem;color:#475569}
+  .card .why{margin:6px 0;font-size:.9rem;color:#475569}
+  .card .why b{color:var(--ink)}
+
+  .approach{margin:10px 0 4px;padding:10px 12px;background:#f8fafc;border-radius:12px}
+  .approach .t{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+  .approach ul{margin:6px 0 0;padding-left:18px;font-size:.88rem;color:#475569}
+  .approach li{margin:3px 0}
+
+  /* Checklist item */
+  .items{margin-top:8px;display:flex;flex-direction:column;gap:8px}
+  .item{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:#fff;transition:border-color .15s}
+  .item.done{background:#f3fdf6;border-color:#bbf7d0}
+  .item .top{display:flex;align-items:flex-start;gap:10px}
+  .item .cb{appearance:none;-webkit-appearance:none;width:22px;height:22px;flex:0 0 auto;margin-top:1px;
+    border:2px solid var(--sky);border-radius:7px;cursor:pointer;position:relative;background:#fff;transition:.15s}
+  .item .cb:checked{background:var(--good);border-color:var(--good)}
+  .item .cb:checked::after{content:"✓";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    color:#fff;font-size:14px;font-weight:900}
+  .item .label{flex:1;font-size:.95rem;font-weight:600}
+  .item.done .label{text-decoration:line-through;color:var(--muted)}
+  .item .expand{background:none;border:none;color:var(--muted);font-size:1.1rem;cursor:pointer;padding:0 2px;line-height:1}
+  .item .controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px}
+  .status{font-size:.8rem;font-weight:700;border:1px solid var(--line);border-radius:99px;
+    padding:6px 10px;background:#fff;cursor:pointer;color:var(--ink)}
+  .status[data-s="In progress"]{background:#fef9e7;border-color:#fde68a;color:#92400e}
+  .status[data-s="Done"]{background:#ecfdf3;border-color:#bbf7d0;color:#166534}
+  .linkbtn{text-decoration:none;font-size:.8rem;font-weight:700;color:#fff;
+    background:var(--sky);padding:6px 12px;border-radius:99px;display:inline-flex;align-items:center;gap:5px}
+  .linkbtn:active{background:var(--sky-deep)}
+  .deadwrap{display:inline-flex;align-items:center;gap:5px;font-size:.78rem;color:var(--muted)}
+  .deadwrap input{border:1px solid var(--line);border-radius:8px;padding:5px 7px;font-size:.8rem;font-family:inherit}
+  .deadwrap input.due-soon{border-color:var(--sun);background:#fff7ed;color:var(--sun-deep);font-weight:700}
+  .deadwrap input.overdue{border-color:#fca5a5;background:#fef2f2;color:#b91c1c;font-weight:700}
+  .details{margin-top:8px;display:none}
+  .details.open{display:block}
+  .details textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:8px;
+    font-family:inherit;font-size:.85rem;resize:vertical;min-height:48px}
+
+  /* generic field */
+  .field{margin:10px 0}
+  .field label{display:block;font-size:.8rem;font-weight:700;color:var(--muted);margin-bottom:4px}
+  .field input,.field textarea,.field select{width:100%;border:1px solid var(--line);border-radius:10px;
+    padding:9px;font-family:inherit;font-size:.9rem}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media(max-width:480px){.grid2{grid-template-columns:1fr}}
+
+  /* skill chips */
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+  .chip{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:99px;
+    padding:7px 12px;font-size:.85rem;cursor:pointer;background:#fff;user-select:none;font-weight:600}
+  .chip input{accent-color:var(--good);width:16px;height:16px}
+  .chip.on{background:#ecfdf3;border-color:#bbf7d0;color:#166534}
+
+  /* roadmap */
+  .phase{border-left:3px solid var(--sky);padding:2px 0 2px 14px;margin:0 0 16px}
+  .phase h4{margin:0 0 2px;font-size:1rem;color:var(--sky-deep)}
+  .phase .when{font-size:.75rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+  .phase ul{margin:6px 0 0;padding-left:18px;font-size:.9rem;color:#475569}
+  .phase li{margin:3px 0}
+
+  /* rec rows */
+  .rec{border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px;background:#fff;position:relative}
+  .rec .rm{position:absolute;top:8px;right:8px;background:#fef2f2;color:#b91c1c;border:1px solid #fecaca;
+    border-radius:8px;width:26px;height:26px;cursor:pointer;font-weight:800}
+  .addbtn{width:100%;border:1px dashed var(--sky);background:#f0f7ff;color:var(--sky-deep);
+    border-radius:12px;padding:11px;font-weight:700;cursor:pointer;font-size:.9rem}
+  .hint{font-size:.8rem;color:var(--muted);margin:4px 0 0}
+
+  footer{text-align:center;color:var(--muted);font-size:.8rem;margin-top:40px;padding-top:16px;border-top:1px solid var(--line)}
+
+  .saved-flash{position:fixed;bottom:16px;left:50%;transform:translateX(-50%) translateY(60px);
+    background:var(--ink);color:#fff;padding:9px 16px;border-radius:99px;font-size:.82rem;font-weight:600;
+    opacity:0;transition:.3s;z-index:50;box-shadow:0 6px 18px rgba(0,0,0,.2)}
+  .saved-flash.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  /* Print */
+  @media print{
+    body{background:#fff}
+    nav.jump,.toolbar,.encourage,.saved-flash,.item .expand,.addbtn,.rec .rm{display:none!important}
+    .details{display:block!important}
+    .card,.overall,.item{box-shadow:none;break-inside:avoid}
+    header.hero{background:#fff}
+    a[href]{color:var(--ink);text-decoration:underline}
+  }
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="plane">🛩️</div>
+  <h1>Flight School Path</h1>
+  <p class="sub">A step-by-step plan for getting from flight sim to real flight training.</p>
+</header>
+
+<div class="wrap">
+
+  <div class="overall">
+    <div class="row">
+      <h2>Overall progress</h2>
+      <div class="pct" id="overallPct">0%</div>
+    </div>
+    <div class="bar"><span id="overallBar"></span></div>
+    <div class="count" id="overallCount">0 of 0 steps done</div>
+    <p class="encourage" id="encourage"></p>
+  </div>
+
+  <div class="banner">
+    <strong>How to talk about your sim hours:</strong> Flight simulator experience can show commitment,
+    consistency, and self-study, but it does not replace real-world instruction or FAA flight hours.
+    Frame it as <em>self-directed aviation study</em> — never as logged flight time.
+  </div>
+
+  <div class="toolbar">
+    <button onclick="window.print()">🖨️ Print view</button>
+    <button onclick="exportJSON()">⬇️ Export JSON</button>
+    <button class="danger" onclick="resetAll()">↺ Reset all</button>
+  </div>
+
+  <nav class="jump" id="jumpNav"></nav>
+
+  <main id="app"></main>
+
+  <footer>
+    Built with care for the journey ahead. Progress saves automatically in this browser.
+    <br/>One step at a time. ✈️
+  </footer>
+</div>
+
+<div class="saved-flash" id="flash">Saved</div>
+
+<script>
+/* ============================================================
+   DATA MODEL
+============================================================ */
+const SECTIONS = [
+  {
+    id:"start", ico:"🚀", title:"Start Here",
+    sub:"The core checklist. Knock these out and the rest gets easier.",
+    links:[
+      {label:"FAFSA", url:"https://studentaid.gov/h/apply-for-aid/fafsa"},
+      {label:"IACRA", url:"https://iacra.faa.gov/"},
+      {label:"FAA Medical", url:"https://www.faa.gov/pilots/medical_certification"},
+      {label:"AOPA", url:"https://www.aopa.org/"},
+      {label:"EAA", url:"https://www.eaa.org/"}
+    ],
+    items:[
+      {t:"Create FAFSA account", link:"https://studentaid.gov/h/apply-for-aid/fafsa"},
+      {t:"Submit FAFSA", link:"https://studentaid.gov/h/apply-for-aid/fafsa"},
+      {t:"Apply to 2–3 North Carolina aviation community college programs"},
+      {t:"Join AOPA", link:"https://www.aopa.org/"},
+      {t:"Join EAA", link:"https://www.eaa.org/"},
+      {t:"Find nearest EAA chapter", link:"https://www.eaa.org/eaa/eaa-chapters/find-an-eaa-chapter"},
+      {t:"Schedule one discovery flight"},
+      {t:"Apply for FAA student pilot certificate through IACRA", link:"https://iacra.faa.gov/"},
+      {t:"Complete FAA MedXPress form", link:"https://medxpress.faa.gov/"},
+      {t:"Schedule FAA medical exam with AME", link:"https://www.faa.gov/pilots/amelocator"},
+      {t:"Create one-page aviation resume"},
+      {t:"Ask for two recommendation letters"},
+      {t:"Write scholarship essay draft"},
+      {t:"Track simulator hours and skills practiced"}
+    ]
+  },
+  {
+    id:"grants", ico:"💵", title:"Grants & Financial Aid",
+    sub:"Free money first. Start here before loans.",
+    cards:[
+      {
+        h:"FAFSA / Pell Grant",
+        desc:"First step. FAFSA can unlock Pell Grants, school aid, work-study, and federal student loans. Add all possible aviation schools to the FAFSA.",
+        link:"https://studentaid.gov/h/apply-for-aid/fafsa",
+        items:[
+          {t:"Create StudentAid.gov account"},
+          {t:"Gather parent/contributor info if required"},
+          {t:"Add GTCC, Sandhills, A-B Tech, and Elizabeth City State University to FAFSA"},
+          {t:"Submit FAFSA"},
+          {t:"Save confirmation"}
+        ]
+      },
+      {
+        h:"Next NC Scholarship",
+        desc:"North Carolina scholarship for eligible NC students attending community college. Often no separate application beyond FAFSA and school enrollment.",
+        link:"https://www.cfnc.org/pay-for-college/next-nc-scholarship/",
+        items:[
+          {t:"Submit FAFSA"},
+          {t:"Apply to eligible NC community college"},
+          {t:"Confirm eligibility with financial aid office"},
+          {t:"Ask school if Next NC is included in aid package"}
+        ]
+      }
+    ]
+  },
+  {
+    id:"schools", ico:"🎓", title:"North Carolina Aviation Schools",
+    sub:"Community college first — lowest cost, connects to FAFSA and grants.",
+    cards:[
+      {
+        h:"Guilford Technical Community College",
+        meta:[["Greensboro, NC","pill"],["Community college pilot path","pill"]],
+        why:"Strong option for someone with no money — community college connects to FAFSA, grants, scholarships, and lower tuition.",
+        link:"https://www.gtcc.edu/academics/academic-programs/programs/manufacturing-transportation-construction/career-pilot.php",
+        items:[{t:"Research & apply to GTCC"}]
+      },
+      {
+        h:"Sandhills Community College",
+        meta:[["Pinehurst, NC","pill"],["Professional Pilot program","pill"]],
+        why:"Good community college path with aviation training and financial aid options.",
+        link:"https://www.sandhills.edu/programs/transportation/aviation-professional-pilot.html",
+        items:[{t:"Research & apply to Sandhills"}]
+      },
+      {
+        h:"A-B Tech Community College",
+        meta:[["Asheville, NC","pill"],["Career Pilot Technology","pill"]],
+        why:"Community college route with published aviation cost estimates.",
+        link:"https://abtech.edu/program/career-pilot-technology-pathway-aas",
+        items:[{t:"Research & apply to A-B Tech"}]
+      },
+      {
+        h:"Elizabeth City State University",
+        meta:[["Elizabeth City, NC","pill"],["Four-year aviation program","pill"]],
+        why:"Four-year aviation degree option. Good to compare, but likely more expensive than community college.",
+        link:"https://www.ecsu.edu/academics/undergrad/aviation/index.php",
+        items:[{t:"Research & compare ECSU"}]
+      }
+    ]
+  },
+  {
+    id:"national", ico:"🏅", title:"National Aviation Scholarships",
+    sub:"Open to more than just current high schoolers. Worth real money.",
+    cards:[
+      {
+        h:"AOPA Flight Training Scholarships",
+        meta:[["$2,500–$14,000","pill amount"],["Not only for HS students","pill"]],
+        desc:"Good national option. Available across categories.",
+        link:"https://www.aopa.org/training-and-safety/students/aopa-flight-training-scholarships",
+        approach:["Join AOPA","Prepare aviation resume","Get two recommendation letters",
+          "Write essay around commitment, self-study, and a realistic training plan",
+          "Mention flight sim as self-directed aviation study","Do not describe simulator time as real flight time"],
+        items:[
+          {t:"Join AOPA"},{t:"Review current scholarship categories"},{t:"Confirm deadline"},
+          {t:"Draft essay"},{t:"Request two recommendation letters"},{t:"Submit application"},{t:"Save confirmation"}
+        ]
+      },
+      {
+        h:"EAA Flight Training Scholarships",
+        meta:[["Several thousand $","pill amount"],["Ages 16+","pill"]],
+        desc:"Good for students 16+ who are serious about aviation. Not limited to current high school students.",
+        link:"https://www.eaa.org/eaa/learn-to-fly/scholarships/eaa-flight-training-scholarships",
+        approach:["Join EAA","Attend local EAA chapter events","Volunteer if possible",
+          "Take a discovery flight before applying if possible","Build a short resume showing commitment"],
+        items:[
+          {t:"Join EAA"},{t:"Find local chapter"},{t:"Attend meeting"},
+          {t:"Volunteer at one aviation event"},{t:"Draft application"},{t:"Submit application"}
+        ]
+      },
+      {
+        h:"EAA General Scholarship Portal",
+        meta:[["Varies","pill amount"],["Multiple scholarships","pill"]],
+        desc:"One place to look for multiple EAA scholarships.",
+        link:"https://www.eaa.org/eaa/learn-to-fly/scholarships",
+        items:[
+          {t:"Review eligibility"},{t:"Save matching scholarships"},{t:"Track deadlines"},{t:"Submit applications"}
+        ]
+      },
+      {
+        h:"EAA Ray Aviation Scholarship",
+        meta:[["Up to ~$12,000","pill amount"],["Chapter-based","pill"]],
+        desc:"Possible, but harder — it is chapter-based and usually requires working with a local EAA chapter.",
+        link:"https://www.eaa.org/eaa/eaa-chapters/eaa-chapter-resources/chapter-programs-and-activities/ray-aviation-scholarship-fund",
+        approach:["Find nearest EAA chapter","Ask if they participate in Ray Aviation","Attend meetings",
+          "Show readiness to start training","Get student pilot certificate and FAA medical started"],
+        items:[
+          {t:"Find local EAA chapter"},{t:"Contact chapter scholarship coordinator"},
+          {t:"Ask if they participate in Ray Aviation"},{t:"Attend chapter meeting"},
+          {t:"Start FAA student pilot certificate"},{t:"Start FAA medical process"},{t:"Apply if chapter supports it"}
+        ]
+      }
+    ]
+  },
+  {
+    id:"ncschol", ico:"🌲", title:"North Carolina Scholarships",
+    sub:"Best pursued once he's enrolled in an NC aviation program.",
+    cards:[
+      {
+        h:"NC Airports Association Scholarship",
+        meta:[["~$5,000","pill amount"],["After enrollment","pill"]],
+        desc:"Better after he is enrolled in an NC aviation college program.",
+        link:"https://ncairports.org/ncaa-scholarship-foundation/",
+        approach:["Enroll in aviation program first","Build resume","Show commercial aviation goal",
+          "Apply once he has a real school path"],
+        items:[
+          {t:"Enroll in NC aviation program"},{t:"Confirm eligibility"},{t:"Draft essay"},
+          {t:"Get recommendation"},{t:"Submit application"}
+        ]
+      }
+    ]
+  },
+  {
+    id:"sim", ico:"🕹️", title:"Flight Simulator Experience Tracker",
+    sub:"Turn sim time into a strong, honest application story.",
+    custom:"sim"
+  },
+  {
+    id:"essay", ico:"✍️", title:"Essay Builder",
+    sub:"Reusable guidance you can adapt for every application.",
+    custom:"essay",
+    items:[
+      {t:"Explain why aviation matters to him"},
+      {t:"Explain what he has done without money or access"},
+      {t:"Mention flight sim as self-directed study"},
+      {t:"Mention that he understands real training is different"},
+      {t:"Explain his realistic plan"},
+      {t:"Explain why financial help matters"},
+      {t:"Explain how he will complete training"}
+    ]
+  },
+  {
+    id:"recs", ico:"📨", title:"Recommendation Letter Tracker",
+    sub:"Aim for two strong letters. Avoid family members.",
+    custom:"recs"
+  },
+  {
+    id:"roadmap", ico:"🗺️", title:"Best Application Order",
+    sub:"If you only follow one thing, follow this order.",
+    custom:"roadmap"
+  }
+];
+
+const ROADMAP = [
+  {when:"Phase 1 — This Week",items:["FAFSA","Apply to NC aviation schools","Join AOPA","Join EAA","Start aviation resume"]},
+  {when:"Phase 2 — This Month",items:["Discovery flight","FAA student pilot certificate","FAA medical","Recommendation letters","AOPA scholarship application"]},
+  {when:"Phase 3 — Next 2–3 Months",items:["Attend EAA chapter meetings","Volunteer","Apply for EAA scholarships","Track school aid packages"]},
+  {when:"Phase 4 — After Enrollment",items:["Apply for NC Airports Association scholarship","Apply for school-specific scholarships","Continue flight training"]}
+];
+
+const SIM_SKILLS = ["Checklists","Traffic patterns","Takeoffs and landings","VFR navigation","IFR basics",
+  "Radio communication","VATSIM / online ATC","Flight planning","Weather briefings","Emergency procedures","Aircraft systems"];
+
+const REC_ROLES = "Teacher · Manager · Coach · Mentor · Flight instructor (discovery flight) · EAA chapter contact";
+
+const ENCOURAGEMENTS = [
+  "Every checkmark is a real step toward the cockpit.",
+  "You're building momentum. Keep going. ✈️",
+  "Showing up consistently is exactly what scholarships reward.",
+  "This is what self-directed pilots do. Proud of the progress.",
+  "Halfway is closer than it feels. Stay the course.",
+  "Clear skies ahead — you're doing the work."
+];
+
+/* ============================================================
+   STATE / PERSISTENCE
+============================================================ */
+const KEY = "flightSchoolPath.v1";
+let state = load();
+
+function load(){
+  try{ return JSON.parse(localStorage.getItem(KEY)) || blank(); }
+  catch(e){ return blank(); }
+}
+function blank(){
+  return { items:{}, sim:{used:"",hours:"",aircraft:"",notes:"",skills:{}}, essay:{draft:""}, recs:[ {},{} ] };
+}
+let saveTimer;
+function save(quiet){
+  localStorage.setItem(KEY, JSON.stringify(state));
+  if(!quiet){
+    clearTimeout(saveTimer);
+    const f=document.getElementById("flash"); f.classList.add("show");
+    saveTimer=setTimeout(()=>f.classList.remove("show"),900);
+  }
+}
+function itemState(id){
+  if(!state.items[id]) state.items[id]={status:"Not started",notes:"",deadline:""};
+  return state.items[id];
+}
+
+/* ============================================================
+   HELPERS
+============================================================ */
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const STATUSES = ["Not started","In progress","Done"];
+
+// Build a flat list of every tracked item id (for progress)
+let ALL_ITEM_IDS = [];
+function buildIds(){
+  ALL_ITEM_IDS = [];
+  SECTIONS.forEach(sec=>{
+    sectionItems(sec).forEach(it=>ALL_ITEM_IDS.push(it.id));
+  });
+}
+// returns items belonging to a section (top-level + inside cards), with stable ids
+function sectionItems(sec){
+  const out=[];
+  (sec.items||[]).forEach((it,i)=>out.push({...it,id:`${sec.id}.i${i}`}));
+  (sec.cards||[]).forEach((card,ci)=>(card.items||[]).forEach((it,i)=>out.push({...it,id:`${sec.id}.c${ci}.i${i}`})));
+  return out;
+}
+
+/* ============================================================
+   RENDER
+============================================================ */
+function itemHTML(it){
+  const st = itemState(it.id);
+  const done = st.status==="Done";
+  const link = it.link ? `<a class="linkbtn" href="${esc(it.link)}" target="_blank" rel="noopener">Open ↗</a>` : "";
+  return `<div class="item ${done?'done':''}" data-id="${it.id}">
+    <div class="top">
+      <input type="checkbox" class="cb" ${done?'checked':''} onchange="toggleDone('${it.id}',this.checked)" aria-label="Mark done"/>
+      <div class="label">${esc(it.t)}</div>
+      <button class="expand" onclick="toggleDetails(this)" aria-label="More">⋯</button>
+    </div>
+    <div class="controls">
+      <select class="status" data-s="${st.status}" onchange="setStatus('${it.id}',this.value)">
+        ${STATUSES.map(s=>`<option ${s===st.status?'selected':''}>${s}</option>`).join("")}
+      </select>
+      ${link}
+      <span class="deadwrap">📅 <input type="date" value="${st.deadline||''}" onchange="setDeadline('${it.id}',this.value)"/></span>
+    </div>
+    <div class="details">
+      <textarea placeholder="Notes…" oninput="setNotes('${it.id}',this.value)">${esc(st.notes||"")}</textarea>
+    </div>
+  </div>`;
+}
+
+function cardHTML(sec,card,ci){
+  const items=(card.items||[]).map((it,i)=>itemHTML({...it,id:`${sec.id}.c${ci}.i${i}`})).join("");
+  const meta=(card.meta||[]).map(m=>`<span class="${m[1]}">${esc(m[0])}</span>`).join("");
+  const desc=card.desc?`<p class="desc">${esc(card.desc)}</p>`:"";
+  const why=card.why?`<p class="why"><b>Why it matters:</b> ${esc(card.why)}</p>`:"";
+  const link=card.link?`<p><a class="linkbtn" href="${esc(card.link)}" target="_blank" rel="noopener">Visit site ↗</a></p>`:"";
+  const approach=card.approach?`<div class="approach"><div class="t">Application approach</div>
+     <ul>${card.approach.map(a=>`<li>${esc(a)}</li>`).join("")}</ul></div>`:"";
+  return `<div class="card">
+    <h3>${esc(card.h)}</h3>
+    ${meta?`<div class="meta">${meta}</div>`:""}
+    ${desc}${why}${link}${approach}
+    ${items?`<div class="items">${items}</div>`:""}
+  </div>`;
+}
+
+function sectionProgress(sec){
+  const ids=sectionItems(sec).map(i=>i.id);
+  const total=ids.length;
+  const done=ids.filter(id=>itemState(id).status==="Done").length;
+  return {done,total};
+}
+
+function sectionHTML(sec){
+  const p=sectionProgress(sec);
+  const pct = p.total? Math.round(p.done/p.total*100):0;
+  const progBar = p.total ? `<div class="sec-prog">
+      <div class="bar"><span style="width:${pct}%"></span></div>
+      <span class="lbl">${p.done}/${p.total} done</span></div>` : "";
+
+  let body="";
+  // resource links row
+  if(sec.links){
+    body += `<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">`+
+      sec.links.map(l=>`<a class="linkbtn" href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)} ↗</a>`).join("")+`</div>`;
+  }
+  // top-level items
+  if(sec.items && !sec.custom){
+    body += `<div class="items">`+sec.items.map((it,i)=>itemHTML({...it,id:`${sec.id}.i${i}`})).join("")+`</div>`;
+  }
+  // cards
+  if(sec.cards){ body += sec.cards.map((c,ci)=>cardHTML(sec,c,ci)).join(""); }
+  // custom blocks
+  if(sec.custom==="sim") body += simHTML();
+  if(sec.custom==="essay") body += essayHTML(sec);
+  if(sec.custom==="recs") body += recsHTML();
+  if(sec.custom==="roadmap") body += roadmapHTML();
+
+  return `<section class="block" id="sec-${sec.id}">
+    <div class="sec-head"><span class="ico">${sec.ico}</span><h2>${esc(sec.title)}</h2></div>
+    <p class="sec-sub">${esc(sec.sub)}</p>
+    ${progBar}
+    ${body}
+  </section>`;
+}
+
+/* ----- custom: simulator ----- */
+function simHTML(){
+  const s=state.sim;
+  const chips=SIM_SKILLS.map(skill=>{
+    const on=!!s.skills[skill];
+    return `<label class="chip ${on?'on':''}">
+      <input type="checkbox" ${on?'checked':''} onchange="toggleSkill('${esc(skill)}',this.checked)"/> ${esc(skill)}</label>`;
+  }).join("");
+  return `<div class="card">
+    <p class="desc">Help him turn flight sim time into a strong application story.</p>
+    <div class="grid2">
+      <div class="field"><label>Simulator used</label>
+        <input value="${esc(s.used)}" placeholder="MSFS / X-Plane / other" oninput="setSim('used',this.value)"/></div>
+      <div class="field"><label>Approximate hours</label>
+        <input value="${esc(s.hours)}" placeholder="e.g. 200" oninput="setSim('hours',this.value)"/></div>
+    </div>
+    <div class="field"><label>Aircraft practiced</label>
+      <input value="${esc(s.aircraft)}" placeholder="e.g. C172, PA-28" oninput="setSim('aircraft',this.value)"/></div>
+    <div class="field"><label>Skills practiced</label>
+      <div class="chips">${chips}</div></div>
+    <div class="field"><label>Notes (screenshots / evidence optional)</label>
+      <textarea oninput="setSim('notes',this.value)" placeholder="What you practiced, milestones, links to screenshots…">${esc(s.notes)}</textarea></div>
+    <div class="banner">Use this as evidence of self-directed learning, discipline, and aviation interest.
+      <strong>Do not present it as official FAA flight time.</strong></div>
+  </div>`;
+}
+
+/* ----- custom: essay ----- */
+function essayHTML(sec){
+  const items=sec.items.map((it,i)=>itemHTML({...it,id:`${sec.id}.i${i}`})).join("");
+  return `<div class="card">
+    <div class="approach"><div class="t">Core essay angle</div>
+      <p class="desc" style="margin:6px 0 0">“I didn’t grow up with access to flight training, but I found aviation
+      through simulation and taught myself as much as I could. Now I’m trying to take the responsible next step:
+      formal training through community college, FAA medical certification, and a path toward becoming a commercial pilot.”</p>
+    </div>
+    <div class="field"><label>Working essay draft (saves automatically)</label>
+      <textarea style="min-height:160px" oninput="setEssay(this.value)" placeholder="Write and refine the essay here…">${esc(state.essay.draft)}</textarea></div>
+    <div class="field"><label>Essay checklist</label><div class="items">${items}</div></div>
+  </div>`;
+}
+
+/* ----- custom: recommendations ----- */
+function recsHTML(){
+  const rows=state.recs.map((r,i)=>`<div class="rec">
+    <button class="rm" onclick="removeRec(${i})" title="Remove">×</button>
+    <div class="grid2">
+      <div class="field"><label>Recommender name</label><input value="${esc(r.name||'')}" oninput="setRec(${i},'name',this.value)"/></div>
+      <div class="field"><label>Relationship</label><input value="${esc(r.rel||'')}" placeholder="Teacher, manager…" oninput="setRec(${i},'rel',this.value)"/></div>
+    </div>
+    <div class="field"><label>Email</label><input value="${esc(r.email||'')}" oninput="setRec(${i},'email',this.value)"/></div>
+    <div class="grid2">
+      <div class="field"><label>Asked date</label><input type="date" value="${esc(r.asked||'')}" oninput="setRec(${i},'asked',this.value)"/></div>
+      <div class="field"><label>Received date</label><input type="date" value="${esc(r.received||'')}" oninput="setRec(${i},'received',this.value)"/></div>
+    </div>
+    <div class="field"><label>Notes</label><input value="${esc(r.notes||'')}" oninput="setRec(${i},'notes',this.value)"/></div>
+  </div>`).join("");
+  return `<div class="card">
+    <p class="desc"><b>Good people to ask:</b> ${REC_ROLES}.</p>
+    <p class="hint" style="color:#b91c1c;font-weight:600">Avoid family members.</p>
+    ${rows}
+    <button class="addbtn" onclick="addRec()">+ Add recommender</button>
+  </div>`;
+}
+
+/* ----- custom: roadmap ----- */
+function roadmapHTML(){
+  return `<div class="card">`+ROADMAP.map(p=>`<div class="phase">
+    <div class="when">${esc(p.when.split('—')[0])}</div>
+    <h4>${esc(p.when.split('—')[1]||p.when)}</h4>
+    <ul>${p.items.map(i=>`<li>${esc(i)}</li>`).join("")}</ul>
+  </div>`).join("")+`</div>`;
+}
+
+/* ============================================================
+   PROGRESS + NAV
+============================================================ */
+function refreshProgress(){
+  const total=ALL_ITEM_IDS.length;
+  const done=ALL_ITEM_IDS.filter(id=>itemState(id).status==="Done").length;
+  const pct=total?Math.round(done/total*100):0;
+  document.getElementById("overallPct").textContent=pct+"%";
+  document.getElementById("overallBar").style.width=pct+"%";
+  document.getElementById("overallCount").textContent=`${done} of ${total} steps done`;
+  const enc=document.getElementById("encourage");
+  if(pct===0) enc.textContent="Pick one thing and start. That's the whole secret.";
+  else if(pct===100) enc.textContent="🎉 Every step complete. Time to fly.";
+  else enc.textContent=ENCOURAGEMENTS[Math.min(ENCOURAGEMENTS.length-1,Math.floor(pct/100*ENCOURAGEMENTS.length))];
+  // section bars
+  SECTIONS.forEach(sec=>{
+    const el=document.querySelector(`#sec-${sec.id} .sec-prog`);
+    if(!el) return;
+    const p=sectionProgress(sec);
+    const spct=p.total?Math.round(p.done/p.total*100):0;
+    el.querySelector(".bar>span").style.width=spct+"%";
+    el.querySelector(".lbl").textContent=`${p.done}/${p.total} done`;
+  });
+  markDeadlines();
+}
+
+function markDeadlines(){
+  const today=new Date(); today.setHours(0,0,0,0);
+  document.querySelectorAll('.deadwrap input[type=date]').forEach(inp=>{
+    inp.classList.remove("due-soon","overdue");
+    if(!inp.value) return;
+    const d=new Date(inp.value+"T00:00:00");
+    const days=Math.round((d-today)/86400000);
+    const id=inp.closest(".item").dataset.id;
+    if(itemState(id).status==="Done") return;
+    if(days<0) inp.classList.add("overdue");
+    else if(days<=14) inp.classList.add("due-soon");
+  });
+}
+
+function buildNav(){
+  document.getElementById("jumpNav").innerHTML =
+    SECTIONS.map(s=>`<a href="#sec-${s.id}">${s.ico} ${esc(s.title.replace("North Carolina","NC"))}</a>`).join("");
+}
+
+function render(){
+  document.getElementById("app").innerHTML = SECTIONS.map(sectionHTML).join("");
+  buildNav();
+  refreshProgress();
+}
+
+/* ============================================================
+   EVENT HANDLERS
+============================================================ */
+function toggleDone(id,checked){
+  const st=itemState(id);
+  st.status = checked ? "Done" : "Not started";
+  save();
+  // update DOM in place
+  const item=document.querySelector(`.item[data-id="${id}"]`);
+  item.classList.toggle("done",checked);
+  const sel=item.querySelector(".status"); sel.value=st.status; sel.dataset.s=st.status;
+  refreshProgress();
+}
+function setStatus(id,val){
+  const st=itemState(id); st.status=val; save();
+  const item=document.querySelector(`.item[data-id="${id}"]`);
+  item.classList.toggle("done",val==="Done");
+  item.querySelector(".cb").checked = val==="Done";
+  item.querySelector(".status").dataset.s=val;
+  refreshProgress();
+}
+function setNotes(id,val){ itemState(id).notes=val; save(true); debouncedFlash(); }
+function setDeadline(id,val){ itemState(id).deadline=val; save(); markDeadlines(); }
+function toggleDetails(btn){ btn.closest(".item").querySelector(".details").classList.toggle("open"); }
+
+function setSim(k,v){ state.sim[k]=v; save(true); debouncedFlash(); }
+function toggleSkill(skill,on){
+  state.sim.skills[skill]=on; save();
+  event.target.closest(".chip").classList.toggle("on",on);
+}
+function setEssay(v){ state.essay.draft=v; save(true); debouncedFlash(); }
+
+function setRec(i,k,v){ state.recs[i][k]=v; save(true); debouncedFlash(); }
+function addRec(){ state.recs.push({}); save(); render(); }
+function removeRec(i){ state.recs.splice(i,1); if(!state.recs.length)state.recs.push({}); save(); render(); }
+
+let flashTimer;
+function debouncedFlash(){
+  clearTimeout(flashTimer);
+  flashTimer=setTimeout(()=>{
+    const f=document.getElementById("flash"); f.classList.add("show");
+    setTimeout(()=>f.classList.remove("show"),700);
+  },600);
+}
+
+/* ============================================================
+   TOOLBAR ACTIONS
+============================================================ */
+function exportJSON(){
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url; a.download="flight-school-path-progress.json";
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
+function resetAll(){
+  if(confirm("Reset ALL progress? This clears every checkbox, note, deadline, and saved field. This cannot be undone.")){
+    if(confirm("Are you absolutely sure? Consider exporting JSON first.")){
+      state=blank(); save(); render();
+    }
+  }
+}
+
+/* ============================================================
+   INIT
+============================================================ */
+buildIds();
+render();
+</script>
+</body>
+</html>
