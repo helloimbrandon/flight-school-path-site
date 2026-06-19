@@ -249,8 +249,8 @@
     .menubtn{display:inline-flex}
     footer{margin-bottom:24px}
     .navpane{display:flex;flex-direction:column;position:fixed;inset:0;z-index:56;background:var(--bg);
-      opacity:0;pointer-events:none;transform:translateY(8px);transition:opacity .2s ease,transform .2s ease}
-    .navpane.open{opacity:1;pointer-events:auto;transform:none}
+      pointer-events:none;transform:translateX(-100%);transition:transform .26s cubic-bezier(.22,.61,.36,1)}
+    .navpane.open{pointer-events:auto;transform:translateX(0)}
     .navpane-head{display:flex;align-items:center;justify-content:space-between;
       padding:calc(14px + env(safe-area-inset-top)) 18px 14px;border-bottom:1px solid var(--line)}
     .navpane-title{font-size:1.05rem;font-weight:700}
