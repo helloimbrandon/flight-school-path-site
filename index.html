@@ -84,14 +84,23 @@
   .toolbar button.danger{color:#b91c1c;border-color:#fecaca;background:#fff5f5}
 
   /* Quick nav */
-  nav.jump{display:flex;gap:8px;overflow-x:auto;padding:10px 0 4px;margin-bottom:4px;
-    -webkit-overflow-scrolling:touch;scrollbar-width:thin}
-  nav.jump a{flex:0 0 auto;text-decoration:none;color:var(--sky-deep);background:#e7f0fe;
-    padding:7px 12px;border-radius:99px;font-size:.8rem;font-weight:700;white-space:nowrap}
-  nav.jump a:active{background:#d6e6fd}
+  nav.jump{display:flex;gap:8px;overflow-x:auto;margin:0 -16px 6px;padding:10px 16px;
+    position:sticky;top:0;z-index:20;background:linear-gradient(180deg,var(--bg-bot) 70%,rgba(247,251,255,.85));
+    -webkit-overflow-scrolling:touch;scrollbar-width:thin;backdrop-filter:blur(6px)}
+  nav.jump .tab{flex:0 0 auto;border:1px solid var(--line);background:#fff;color:var(--sky-deep);
+    padding:8px 13px;border-radius:99px;font-size:.82rem;font-weight:700;white-space:nowrap;cursor:pointer;
+    box-shadow:var(--shadow-sm);font-family:inherit}
+  nav.jump .tab.active{background:var(--sky);color:#fff;border-color:var(--sky);box-shadow:0 3px 10px rgba(37,99,235,.3)}
+  .syncbadge{display:flex;align-items:center;justify-content:center;gap:7px;margin:4px 0;
+    font-size:.78rem;font-weight:700;color:var(--muted)}
+  .syncbadge .dot{width:9px;height:9px;border-radius:50%;background:#cbd5e1;flex:0 0 auto;transition:.3s}
+  .syncbadge.on .dot{background:var(--good);box-shadow:0 0 0 3px rgba(22,163,74,.15)}
+  .syncbadge.err .dot{background:var(--sun)}
 
   /* Sections */
-  section.block{margin-top:26px;scroll-margin-top:12px}
+  section.block{display:none;margin-top:16px;scroll-margin-top:64px}
+  section.block.active{display:block;animation:fadein .25s ease}
+  @keyframes fadein{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
   .sec-head{display:flex;align-items:center;gap:10px;margin-bottom:6px}
   .sec-head .ico{font-size:1.3rem}
   .sec-head h2{margin:0;font-size:1.25rem;letter-spacing:-.01em}
@@ -147,6 +156,16 @@
   .details textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:8px;
     font-family:inherit;font-size:.85rem;resize:vertical;min-height:48px}
 
+  /* Attention + minimal polish — make "fill me in" obvious, calm the rest */
+  .item{transition:border-color .15s,background .15s}
+  .item:has(.status[data-s="In progress"]){border-color:#fde68a;background:#fffdf5}
+  .field input::placeholder,.field textarea::placeholder,.details textarea::placeholder{color:#9fb3c8}
+  .field input:placeholder-shown,.field textarea:placeholder-shown{
+    border-style:dashed;border-color:#c3dafc;background:#f7fbff}
+  .field input:focus,.field textarea:focus,.field select:focus,.details textarea:focus{
+    outline:none;border-style:solid;border-color:var(--sky);box-shadow:0 0 0 3px rgba(59,130,246,.15);background:#fff}
+  .details textarea:placeholder-shown{border-style:dashed;border-color:#dbe7f5}
+
   /* generic field */
   .field{margin:10px 0}
   .field label{display:block;font-size:.8rem;font-weight:700;color:var(--muted);margin-bottom:4px}
@@ -187,8 +206,9 @@
   /* Print */
   @media print{
     body{background:#fff}
-    nav.jump,.toolbar,.encourage,.saved-flash,.item .expand,.addbtn,.rec .rm{display:none!important}
+    nav.jump,.toolbar,.encourage,.saved-flash,.syncbadge,.item .expand,.addbtn,.rec .rm{display:none!important}
     .details{display:block!important}
+    section.block{display:block!important;margin-top:18px}
     .card,.overall,.item{box-shadow:none;break-inside:avoid}
     header.hero{background:#fff}
     a[href]{color:var(--ink);text-decoration:underline}
@@ -220,9 +240,10 @@
     Frame it as <em>self-directed aviation study</em> — never as logged flight time.
   </div>
 
+  <div class="syncbadge" id="syncBadge"><span class="dot"></span><span id="syncText">Local only on this device</span></div>
+
   <div class="toolbar">
     <button onclick="window.print()">🖨️ Print view</button>
-    <button onclick="exportJSON()">⬇️ Export JSON</button>
     <button class="danger" onclick="resetAll()">↺ Reset all</button>
   </div>
 
@@ -231,7 +252,7 @@
   <main id="app"></main>
 
   <footer>
-    Built with care for the journey ahead. Progress saves automatically in this browser.
+    Built with care for the journey ahead. Progress saves automatically.
     <br/>One step at a time. ✈️
   </footer>
 </div>
@@ -459,11 +480,20 @@ const ENCOURAGEMENTS = [
 /* ============================================================
    STATE / PERSISTENCE
 ============================================================ */
+/* ── Shared sync (optional) ───────────────────────────────────
+   Paste a Supabase project URL + anon (public) key below to sync
+   the board across devices in real time. Leave blank to stay
+   local-only on each device. */
+const SUPABASE_URL  = "";
+const SUPABASE_ANON = "";
+const WORKSPACE_ID  = "flight-school-path";
+
 const KEY = "flightSchoolPath.v1";
 let state = load();
+let sb=null, applyingRemote=false, pendingRemoteRender=false, remoteTimer;
 
 function load(){
-  try{ return JSON.parse(localStorage.getItem(KEY)) || blank(); }
+  try{ return Object.assign(blank(), JSON.parse(localStorage.getItem(KEY))||{}); }
   catch(e){ return blank(); }
 }
 function blank(){
@@ -472,6 +502,7 @@ function blank(){
 let saveTimer;
 function save(quiet){
   localStorage.setItem(KEY, JSON.stringify(state));
+  if(sb && !applyingRemote){ clearTimeout(remoteTimer); remoteTimer=setTimeout(pushRemote,500); }
   if(!quiet){
     clearTimeout(saveTimer);
     const f=document.getElementById("flash"); f.classList.add("show");
@@ -634,15 +665,15 @@ function recsHTML(){
   const rows=state.recs.map((r,i)=>`<div class="rec">
     <button class="rm" onclick="removeRec(${i})" title="Remove">×</button>
     <div class="grid2">
-      <div class="field"><label>Recommender name</label><input value="${esc(r.name||'')}" oninput="setRec(${i},'name',this.value)"/></div>
+      <div class="field"><label>Recommender name</label><input value="${esc(r.name||'')}" placeholder="Full name" oninput="setRec(${i},'name',this.value)"/></div>
       <div class="field"><label>Relationship</label><input value="${esc(r.rel||'')}" placeholder="Teacher, manager…" oninput="setRec(${i},'rel',this.value)"/></div>
     </div>
-    <div class="field"><label>Email</label><input value="${esc(r.email||'')}" oninput="setRec(${i},'email',this.value)"/></div>
+    <div class="field"><label>Email</label><input value="${esc(r.email||'')}" placeholder="name@email.com" oninput="setRec(${i},'email',this.value)"/></div>
     <div class="grid2">
       <div class="field"><label>Asked date</label><input type="date" value="${esc(r.asked||'')}" oninput="setRec(${i},'asked',this.value)"/></div>
       <div class="field"><label>Received date</label><input type="date" value="${esc(r.received||'')}" oninput="setRec(${i},'received',this.value)"/></div>
     </div>
-    <div class="field"><label>Notes</label><input value="${esc(r.notes||'')}" oninput="setRec(${i},'notes',this.value)"/></div>
+    <div class="field"><label>Notes</label><input value="${esc(r.notes||'')}" placeholder="Optional notes" oninput="setRec(${i},'notes',this.value)"/></div>
   </div>`).join("");
   return `<div class="card">
     <p class="desc"><b>Good people to ask:</b> ${REC_ROLES}.</p>
@@ -701,14 +732,34 @@ function markDeadlines(){
   });
 }
 
-function buildNav(){
-  document.getElementById("jumpNav").innerHTML =
-    SECTIONS.map(s=>`<a href="#sec-${s.id}">${s.ico} ${esc(s.title.replace("North Carolina","NC"))}</a>`).join("");
+let activeTab = localStorage.getItem("fsp.tab") || SECTIONS[0].id;
+function shortTitle(t){
+  return t.replace("North Carolina","NC").replace(" Aviation Schools"," Schools")
+    .replace("Flight Simulator Experience Tracker","Sim Tracker")
+    .replace("Recommendation Letter Tracker","Rec Letters")
+    .replace("National Aviation Scholarships","National $")
+    .replace("Best Application Order","Roadmap")
+    .replace("Grants & Financial Aid","Grants");
 }
-
+function buildTabs(){
+  document.getElementById("jumpNav").innerHTML = SECTIONS.map(s=>
+    `<button class="tab ${s.id===activeTab?'active':''}" data-tab="${s.id}" onclick="selectTab('${s.id}')">${s.ico} ${esc(shortTitle(s.title))}</button>`
+  ).join("");
+}
+function selectTab(id){
+  activeTab=id; localStorage.setItem("fsp.tab",id);
+  document.querySelectorAll("section.block").forEach(s=>s.classList.toggle("active", s.id==="sec-"+id));
+  document.querySelectorAll("nav.jump .tab").forEach(b=>b.classList.toggle("active", b.dataset.tab===id));
+  const tb=document.querySelector('nav.jump .tab[data-tab="'+id+'"]');
+  if(tb) tb.scrollIntoView({inline:"center",block:"nearest",behavior:"smooth"});
+  const nav=document.querySelector("nav.jump");
+  if(nav) window.scrollTo({top:nav.offsetTop,behavior:"smooth"});
+}
 function render(){
+  if(!SECTIONS.some(s=>s.id===activeTab)) activeTab=SECTIONS[0].id;
   document.getElementById("app").innerHTML = SECTIONS.map(sectionHTML).join("");
-  buildNav();
+  buildTabs();
+  document.querySelectorAll("section.block").forEach(s=>s.classList.toggle("active", s.id==="sec-"+activeTab));
   refreshProgress();
 }
 
@@ -760,19 +811,63 @@ function debouncedFlash(){
 /* ============================================================
    TOOLBAR ACTIONS
 ============================================================ */
-function exportJSON(){
-  const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement("a");
-  a.href=url; a.download="flight-school-path-progress.json";
-  document.body.appendChild(a); a.click(); a.remove();
-  URL.revokeObjectURL(url);
-}
 function resetAll(){
   if(confirm("Reset ALL progress? This clears every checkbox, note, deadline, and saved field. This cannot be undone.")){
-    if(confirm("Are you absolutely sure? Consider exporting JSON first.")){
+    if(confirm("Are you absolutely sure?")){
       state=blank(); save(); render();
     }
+  }
+}
+
+/* ============================================================
+   SHARED SYNC
+============================================================ */
+function setSyncBadge(kind,text){
+  const b=document.getElementById("syncBadge");
+  b.className="syncbadge"+(kind?" "+kind:"");
+  document.getElementById("syncText").textContent=text;
+}
+function isEditingText(){
+  const el=document.activeElement;
+  return el && (el.tagName==="TEXTAREA" || (el.tagName==="INPUT" && el.type!=="date" && el.type!=="checkbox"));
+}
+function pushRemote(){
+  if(!sb) return;
+  sb.from("boards").upsert({id:WORKSPACE_ID,data:state,updated_at:new Date().toISOString()})
+    .then(({error})=>{ if(error) console.warn("sync save failed:",error.message); });
+}
+function applyRemote(incoming){
+  if(JSON.stringify(incoming)===JSON.stringify(state)) return; // ignore our own echo
+  state=Object.assign(blank(),incoming);
+  localStorage.setItem(KEY,JSON.stringify(state));
+  if(isEditingText()){ pendingRemoteRender=true; return; }
+  applyingRemote=true; render(); applyingRemote=false;
+}
+async function initSync(){
+  if(!SUPABASE_URL || !SUPABASE_ANON){ setSyncBadge("","Saved on this device"); return; }
+  setSyncBadge("","Connecting…");
+  try{
+    const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
+    sb = createClient(SUPABASE_URL, SUPABASE_ANON, { realtime:{ params:{ eventsPerSecond:5 } } });
+    const { data, error } = await sb.from("boards").select("data").eq("id",WORKSPACE_ID).maybeSingle();
+    if(error) throw error;
+    if(data && data.data){
+      state=Object.assign(blank(),data.data); localStorage.setItem(KEY,JSON.stringify(state));
+      applyingRemote=true; render(); applyingRemote=false;
+    }else{ pushRemote(); } // seed shared board from this device
+    sb.channel("board-"+WORKSPACE_ID)
+      .on("postgres_changes",
+        { event:"*", schema:"public", table:"boards", filter:"id=eq."+WORKSPACE_ID },
+        (payload)=>{ if(payload.new && payload.new.data) applyRemote(payload.new.data); })
+      .subscribe((st)=>{ if(st==="SUBSCRIBED") setSyncBadge("on","Synced — shared live"); });
+    document.addEventListener("focusout", ()=>setTimeout(()=>{
+      if(pendingRemoteRender && !isEditingText()){
+        pendingRemoteRender=false; applyingRemote=true; render(); applyingRemote=false;
+      }
+    },0));
+  }catch(e){
+    console.warn("Sync unavailable, using local only:",e);
+    setSyncBadge("err","Offline — saved on this device");
   }
 }
 
@@ -781,6 +876,7 @@ function resetAll(){
 ============================================================ */
 buildIds();
 render();
+initSync();
 </script>
 </body>
 </html>
