@@ -217,6 +217,24 @@
     box-shadow:0 8px 24px rgba(0,0,0,.25)}
   .saved-flash.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
+  /* Settings flyout — popover on desktop, bottom sheet on mobile */
+  .flyout{position:fixed;inset:0;z-index:55;background:transparent;opacity:0;pointer-events:none;transition:opacity .18s}
+  .flyout.open{opacity:1;pointer-events:auto}
+  .flyout-card{position:absolute;top:62px;right:20px;width:264px;background:var(--surface);border:1px solid var(--line);
+    border-radius:16px;box-shadow:var(--shadow);padding:8px;transform:translateY(-6px) scale(.98);opacity:0;
+    transition:transform .18s ease,opacity .18s ease;transform-origin:top right}
+  .flyout.open .flyout-card{transform:none;opacity:1}
+  .flyout .sheethandle{display:none}
+  .flyout-title{display:none}
+  .menu-item{display:flex;align-items:center;gap:12px;width:100%;border:none;background:none;cursor:pointer;
+    padding:11px 12px;border-radius:10px;font-size:.93rem;font-weight:600;color:var(--ink2);text-align:left;font-family:inherit}
+  .menu-item:hover{background:#eef3f9}
+  .menu-item span{font-size:1.05rem;width:20px;text-align:center;flex:0 0 auto}
+  .menu-item.danger{color:var(--danger)}
+  .menu-item.danger:hover{background:#fff5f4}
+  .menu-sync{padding:11px 12px 6px;border-top:1px solid var(--line);margin-top:6px}
+  .menu-sync .syncbadge{justify-content:flex-start}
+
   /* bottom nav + sheet (mobile only) */
   .bottomnav{display:none}
   .sheet{display:none}
@@ -244,10 +262,19 @@
     .sheet.open .sheetcard{transform:none}
     .sheethandle{width:40px;height:5px;border-radius:99px;background:#d7dee7;margin:8px auto 12px}
     #moreList .navitem{font-size:1rem;padding:13px 12px}
+    /* settings flyout -> bottom sheet on mobile */
+    .flyout{background:rgba(15,30,50,.35);transition:opacity .2s}
+    .flyout-card{top:auto;right:0;left:0;bottom:0;width:auto;border:none;border-radius:22px 22px 0 0;
+      padding:8px 14px calc(20px + env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .25s}
+    .flyout.open .flyout-card{transform:none}
+    .flyout .sheethandle{display:block}
+    .flyout-title{display:block;text-align:center;margin:0 0 6px;font-size:.72rem;color:var(--muted);
+      text-transform:uppercase;letter-spacing:.06em;font-weight:800}
+    .flyout .menu-item{font-size:1rem;padding:15px 12px}
   }
 
   @media print{
-    .topbar,.sidebar,.bottomnav,.sheet,.iconbtn,.searchrow,.chev,.gactions,.factions,footer .futil,.addbtn,.rec .rm{display:none!important}
+    .topbar,.sidebar,.bottomnav,.sheet,.flyout,.iconbtn,.searchrow,.chev,.gactions,.factions,.addbtn,.rec .rm{display:none!important}
     body{background:#fff}
     .layout{display:block}
     .trow,.gcard,.card,.feature{box-shadow:none;border:1px solid #d4dde7;break-inside:avoid}
@@ -262,6 +289,7 @@
   <div class="bar">
     <div class="titles"><h1>Flight School Path</h1><p class="sub">From flight sim to real flight training</p></div>
     <button class="iconbtn" onclick="toggleSearch()" aria-label="Search">🔎</button>
+    <button class="iconbtn" onclick="openSettings()" aria-label="Settings">⚙️</button>
     <div class="pc" title="Overall progress">
       <svg class="ring" viewBox="0 0 36 36"><circle class="ring-bg" cx="18" cy="18" r="15.9155"/><circle class="ring-fg" id="ringFg" cx="18" cy="18" r="15.9155"/></svg>
       <div class="pctext"><b id="overallPct">0%</b><span id="overallCount">0/0</span></div>
@@ -275,12 +303,7 @@
   <main class="content">
     <div id="app"></div>
     <footer>
-      <div class="futil">
-        <button class="ctl" onclick="printAll()">🖨 Print checklist</button>
-        <button class="ctl danger" onclick="resetAll()">↺ Reset all</button>
-      </div>
-      <div class="syncbadge" id="syncBadge"><span class="dot"></span><span id="syncText">Saved on this device</span></div>
-      <div style="margin-top:8px">You don't need to finish everything today · One step at a time ✈️</div>
+      You don't need to finish everything today · One step at a time ✈️
     </footer>
   </main>
 </div>
@@ -288,6 +311,15 @@
 <nav class="bottomnav" id="bottomnav"></nav>
 <div class="sheet" id="moreSheet" onclick="if(event.target===this)closeMore()">
   <div class="sheetcard"><div class="sheethandle"></div><div id="moreList"></div></div>
+</div>
+<div class="flyout" id="settingsSheet" onclick="if(event.target===this)closeSettings()">
+  <div class="flyout-card">
+    <div class="sheethandle"></div>
+    <div class="flyout-title">Settings</div>
+    <button class="menu-item" onclick="closeSettings();printAll()"><span>🖨</span> Print checklist</button>
+    <button class="menu-item danger" onclick="closeSettings();resetAll()"><span>↺</span> Reset all progress</button>
+    <div class="menu-sync"><div class="syncbadge" id="syncBadge"><span class="dot"></span><span id="syncText">Saved on this device</span></div></div>
+  </div>
 </div>
 <div class="saved-flash" id="flash">Saved</div>
 
@@ -819,11 +851,13 @@ function render(){
 }
 function selectTab(id){
   activeTab=id; localStorage.setItem("fsp.tab",id);
-  openDrawers.clear(); closeMore(); render();
+  openDrawers.clear(); closeMore(); closeSettings(); render();
   window.scrollTo({top:0,behavior:"smooth"});
 }
-function openMore(){ document.getElementById("moreSheet").classList.add("open"); }
+function openMore(){ closeSettings(); document.getElementById("moreSheet").classList.add("open"); }
 function closeMore(){ document.getElementById("moreSheet").classList.remove("open"); }
+function openSettings(){ closeMore(); document.getElementById("settingsSheet").classList.add("open"); }
+function closeSettings(){ document.getElementById("settingsSheet").classList.remove("open"); }
 function toggleSearch(){
   const r=document.getElementById("searchRow"); r.classList.toggle("open");
   if(r.classList.contains("open")) document.getElementById("searchInput").focus();
