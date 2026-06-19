@@ -3,307 +3,292 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="theme-color" content="#2b6cb0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#f4f7fb" />
 <title>Flight School Path</title>
 <style>
   :root{
-    --sky:#3b82f6;
-    --sky-deep:#2563eb;
-    --sun:#f59e0b;
-    --sun-deep:#ea580c;
-    --ink:#1e293b;
-    --muted:#64748b;
-    --line:#e2e8f0;
-    --card:#ffffff;
-    --bg-top:#eaf4ff;
-    --bg-bot:#f7fbff;
-    --good:#16a34a;
-    --prog:#f59e0b;
-    --radius:16px;
-    --shadow:0 6px 22px rgba(30,58,95,.08);
-    --shadow-sm:0 2px 8px rgba(30,58,95,.06);
+    --bg:#f4f7fb; --surface:#ffffff;
+    --ink:#0b1f33; --ink2:#34465c; --muted:#6b7a8d;
+    --line:#edf1f6;
+    --accent:#0a84ff; --accent-deep:#0066d6; --accent-soft:#eaf3ff;
+    --good:#34c759; --good-soft:#e8faee;
+    --warn:#ff9f0a; --danger:#ff3b30;
+    --r:18px; --r-sm:12px;
+    --shadow:0 1px 2px rgba(16,40,70,.05),0 10px 30px rgba(16,40,70,.05);
+    --shadow-sm:0 1px 2px rgba(16,40,70,.06);
   }
   *{box-sizing:border-box}
-  html{scroll-behavior:smooth}
-  body{
-    margin:0;
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-    color:var(--ink);
-    background:linear-gradient(180deg,var(--bg-top),var(--bg-bot)) fixed;
-    line-height:1.5;
-    -webkit-font-smoothing:antialiased;
-  }
-  .wrap{max-width:1040px;margin:0 auto;padding:0 16px 50px}
+  html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink);background:var(--bg);line-height:1.5;-webkit-font-smoothing:antialiased}
+  h1,h2,h3,h4{letter-spacing:-.02em}
+  a{color:var(--accent)}
+  button{font-family:inherit}
 
-  /* Sticky top stack: header + tabs + controls */
-  .topbar{position:sticky;top:0;z-index:30;margin:0 -16px;padding:0 16px;
-    background:linear-gradient(180deg,var(--bg-top),var(--bg-bot));
-    box-shadow:0 3px 12px rgba(30,58,95,.06);border-bottom:1px solid var(--line)}
+  /* Top bar */
+  .topbar{position:sticky;top:0;z-index:40;background:rgba(244,247,251,.82);
+    backdrop-filter:saturate(180%) blur(16px);-webkit-backdrop-filter:saturate(180%) blur(16px);
+    border-bottom:1px solid var(--line)}
+  .topbar .bar{max-width:1000px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;gap:14px}
+  .titles{min-width:0;flex:1}
+  .titles h1{margin:0;font-size:1.16rem;font-weight:700;white-space:nowrap}
+  .titles .sub{margin:1px 0 0;font-size:.76rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .iconbtn{width:38px;height:38px;border-radius:50%;border:none;background:var(--surface);box-shadow:var(--shadow-sm);
+    cursor:pointer;font-size:1rem;display:inline-flex;align-items:center;justify-content:center;color:var(--ink2);flex:0 0 auto}
+  .pc{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+  .ring{width:34px;height:34px;transform:rotate(-90deg)}
+  .ring circle{fill:none;stroke-width:3.4}
+  .ring .ring-bg{stroke:#e3eaf2}
+  .ring .ring-fg{stroke:var(--accent);stroke-linecap:round;stroke-dasharray:100 100;stroke-dashoffset:100;
+    transition:stroke-dashoffset .55s ease}
+  .pctext{display:flex;flex-direction:column;line-height:1.04}
+  .pctext b{font-size:.82rem;font-weight:700}
+  .pctext span{font-size:.66rem;color:var(--muted)}
+  .searchrow{max-width:1000px;margin:0 auto;padding:0 20px;max-height:0;overflow:hidden;
+    transition:max-height .22s ease,padding .22s ease}
+  .searchrow.open{max-height:64px;padding:0 20px 12px}
+  .searchrow input{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:12px;
+    padding:10px 14px;font-size:.95rem;font-family:inherit;box-shadow:var(--shadow-sm)}
+  .searchrow input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
 
-  /* Compact header */
-  header.hero{display:flex;align-items:center;gap:12px;padding:11px 0 9px}
-  .hero .plane{font-size:24px;line-height:1;flex:0 0 auto}
-  .hero .titles{min-width:0}
-  .hero h1{margin:0;font-size:1.12rem;letter-spacing:-.01em;line-height:1.15;white-space:nowrap}
-  .hero .sub{margin:0;color:var(--muted);font-size:.76rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .pc{margin-left:auto;display:flex;align-items:center;gap:10px;flex:1;max-width:360px}
-  .pc .pnum{font-size:.8rem;font-weight:700;color:var(--ink);white-space:nowrap}
-  .pc .pbar{flex:1;height:8px;border-radius:99px;background:#e6edf5;overflow:hidden}
-  .pc .pbar>span{display:block;height:100%;width:0;border-radius:99px;
-    background:linear-gradient(90deg,var(--sun),var(--sun-deep));transition:width .4s ease}
-  .pc .ppct{font-size:.95rem;font-weight:800;color:var(--sun-deep);white-space:nowrap}
-  @media(max-width:640px){
-    header.hero{flex-wrap:wrap;gap:6px 10px;padding:9px 0 7px}
-    .hero .sub{display:none}
-    .hero h1{font-size:1.02rem}
-    .pc{max-width:none;width:100%;margin-left:0}
-  }
+  /* Layout */
+  .layout{max-width:1000px;margin:0 auto;display:flex;gap:30px;padding:0 20px;align-items:flex-start}
+  .sidebar{width:212px;flex:0 0 auto;position:sticky;top:72px;padding:22px 0 40px}
+  .navgroup{display:flex;flex-direction:column;gap:2px}
+  .navlabel{font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);
+    padding:20px 14px 6px}
+  .navitem{display:flex;align-items:center;gap:11px;width:100%;border:none;background:none;cursor:pointer;
+    padding:9px 14px;border-radius:11px;font-size:.95rem;font-weight:600;color:var(--ink2);text-align:left}
+  .navitem:hover{background:#eaf0f7}
+  .navitem.active{background:var(--accent-soft);color:var(--accent-deep)}
+  .navitem .nicon{font-size:1.05rem;width:22px;text-align:center;flex:0 0 auto}
+  .content{flex:1;min-width:0;padding:24px 0 40px;max-width:680px}
 
-  .bar{height:8px;border-radius:99px;background:#e6edf5;overflow:hidden}
-  .bar>span{display:block;height:100%;width:0;border-radius:99px;
-    background:linear-gradient(90deg,var(--sky),var(--sky-deep));transition:width .4s ease}
+  /* Section header */
+  .block{animation:fade .25s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .sechead{margin:2px 0 18px}
+  .sechead h2{margin:0;font-size:1.62rem;font-weight:700}
+  .sechead .guide{margin:7px 0 0;font-size:.95rem;color:var(--muted);max-width:54ch}
 
-  /* Controls bar */
-  .controls{display:flex;gap:7px;align-items:center;padding:0 0 9px;flex-wrap:wrap}
-  .controls .search{flex:1 1 150px;min-width:130px;display:flex;align-items:center;gap:6px;
-    border:1px solid var(--line);background:#fff;border-radius:9px;padding:6px 9px;color:var(--muted)}
-  .controls .search input{border:none;outline:none;width:100%;font-family:inherit;font-size:.85rem;background:transparent;color:var(--ink)}
-  .ctl{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:9px;
-    padding:6px 10px;font-size:.78rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap}
-  .ctl:hover{background:#f1f6fc}
-  .ctl.on{background:var(--sky);color:#fff;border-color:var(--sky)}
-  .ctl.danger{color:#b91c1c;border-color:#fecaca;background:#fff5f5}
-  select.ctl{padding-right:6px}
-  .controls .syncbadge{margin-left:auto}
+  /* Next up */
+  .nextup{margin:0 0 28px}
+  .nuhead{margin:0 0 12px}
+  .nuhead h2{margin:0;font-size:1.02rem;font-weight:700}
+  .nuhead p{margin:3px 0 0;font-size:.88rem;color:var(--muted)}
+  .features{display:grid;gap:12px}
+  .feature{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);padding:16px 17px;border:1px solid var(--line)}
+  .feature.done{opacity:.62}
+  .fhead{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+  .prio{font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--accent-deep);
+    background:var(--accent-soft);padding:3px 9px;border-radius:99px}
+  .donetag{font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#1a7f37;
+    background:var(--good-soft);padding:3px 9px;border-radius:99px;margin-left:auto}
+  .feature h3{margin:0 0 5px;font-size:1.12rem;font-weight:700}
+  .fwhy{margin:0 0 14px;font-size:.92rem;color:var(--ink2)}
+  .factions{display:flex;flex-wrap:wrap;gap:8px}
 
-  /* Dismissible sim-hours callout */
-  .callout{display:flex;gap:10px;align-items:flex-start;background:#fffaf0;border:1px solid #fde7c2;
-    border-left:3px solid var(--sun);border-radius:10px;padding:9px 12px;margin:12px 0 2px;
-    font-size:.82rem;color:#7c4a03}
-  .callout strong{color:#92400e}
-  .callout .x{margin-left:auto;flex:0 0 auto;background:none;border:none;color:#b6803a;
-    cursor:pointer;font-size:1rem;line-height:1;padding:0 2px}
+  /* round check */
+  .check{width:26px;height:26px;flex:0 0 auto;border-radius:50%;border:2px solid #cfd9e6;background:var(--surface);
+    cursor:pointer;position:relative;transition:.15s;padding:0}
+  .check:hover{border-color:var(--accent)}
+  .check.on,.trow.done .check{background:var(--good);border-color:var(--good)}
+  .check.on::after,.trow.done .check::after{content:"✓";position:absolute;inset:0;display:flex;align-items:center;
+    justify-content:center;color:#fff;font-size:14px;font-weight:900}
 
-  /* Sim/essay info banner (kept) */
-  .banner{
-    background:#fffaf0;border:1px solid #fde7c2;border-left:4px solid var(--sun);
-    border-radius:12px;padding:12px 14px;margin:14px 0;font-size:.9rem;color:#7c4a03;
-  }
-  .banner strong{color:#92400e}
+  /* buttons */
+  .btn{display:inline-flex;align-items:center;gap:6px;border-radius:11px;padding:9px 15px;font-size:.9rem;font-weight:650;
+    cursor:pointer;border:1px solid transparent;text-decoration:none;font-family:inherit}
+  .btn.primary{background:var(--accent);color:#fff}
+  .btn.primary:hover{background:var(--accent-deep)}
+  .btn.ghost{background:#eef3f9;color:var(--ink2)}
+  .btn.ghost:hover{background:#e3ecf5}
 
-  /* Section tabs */
-  nav.jump{display:flex;gap:7px;overflow-x:auto;padding:7px 0;
-    -webkit-overflow-scrolling:touch;scrollbar-width:none}
-  nav.jump::-webkit-scrollbar{display:none}
-  nav.jump .tab{flex:0 0 auto;border:1px solid var(--line);background:#fff;color:var(--sky-deep);
-    padding:6px 12px;border-radius:99px;font-size:.8rem;font-weight:700;white-space:nowrap;cursor:pointer;
-    font-family:inherit}
-  nav.jump .tab.active{background:var(--sky);color:#fff;border-color:var(--sky)}
-  .syncbadge{display:flex;align-items:center;gap:6px;font-size:.72rem;font-weight:700;color:var(--muted)}
-  .syncbadge .dot{width:8px;height:8px;border-radius:50%;background:#cbd5e1;flex:0 0 auto;transition:.3s}
-  .syncbadge.on .dot{background:var(--good);box-shadow:0 0 0 3px rgba(22,163,74,.15)}
-  .syncbadge.err .dot{background:var(--sun)}
+  /* priority groups */
+  .pgroup{margin:0 0 20px}
+  .plabel{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 2px 9px}
+  .pgroup.first .plabel{color:var(--accent-deep)}
+  .tasks{display:flex;flex-direction:column;gap:8px}
+  .empty{padding:22px;text-align:center;color:var(--muted);font-size:.9rem;background:var(--surface);
+    border-radius:var(--r);box-shadow:var(--shadow-sm)}
 
-  /* Section */
-  section.block{margin-top:8px;animation:fadein .2s ease}
-  @keyframes fadein{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
-  .sec-head{display:flex;align-items:center;gap:9px;margin:10px 0 8px}
-  .sec-head h2{margin:0;font-size:1.02rem;letter-spacing:-.01em}
-  .sec-head .cnt{font-size:.72rem;font-weight:700;color:var(--muted);background:#eef2f7;
-    border-radius:99px;padding:2px 8px;white-space:nowrap}
-  .sec-head .minibar{width:64px;flex:0 0 auto}
+  /* task row */
+  .trow{background:var(--surface);border-radius:14px;box-shadow:var(--shadow-sm);border:1px solid var(--line);overflow:hidden}
+  .trow.done{background:#fbfdfe}
+  .trowmain{display:flex;align-items:center;gap:12px;padding:13px 15px;cursor:pointer}
+  .trow .tbody{flex:1;min-width:0}
+  .ttitle{font-size:.97rem;font-weight:600;line-height:1.3}
+  .trow.done .ttitle{color:var(--muted);text-decoration:line-through}
+  .tmeta{display:flex;gap:8px;align-items:center;margin-top:3px}
+  .tdot{font-size:.72rem;font-weight:700;color:#b86b00}
+  .duechip{font-size:.72rem;font-weight:700;color:var(--muted);background:#f0f4f9;padding:2px 8px;border-radius:99px}
+  .duechip.due-soon{background:#fff4e3;color:#b86b00}
+  .duechip.overdue{background:#ffe9e7;color:#c5291d}
+  .chev{flex:0 0 auto;border:none;background:none;color:#b6c2d2;font-size:1.05rem;cursor:pointer;
+    transition:transform .2s;padding:4px;line-height:1}
+  .trow.open .chev{transform:rotate(180deg)}
+  .tdrawer{display:none;padding:2px 15px 15px;border-top:1px solid var(--line)}
+  .trow.open .tdrawer{display:block}
+  .tdrawer .dwhy{margin:13px 0 6px;font-size:.9rem;color:var(--ink2)}
+  .tdrawer .dneed{margin:6px 0;font-size:.88rem;color:var(--ink2)}
+  .tdrawer .dneed b,.tdrawer .dwhy b{color:var(--ink)}
+  .drow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:13px 0}
+  .dfield{margin:11px 0}
+  .dfield label{display:block;font-size:.74rem;font-weight:700;color:var(--muted);margin-bottom:5px}
+  .dfield input,.dfield textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:9px 11px;
+    font-family:inherit;font-size:.9rem;background:var(--surface)}
+  .dfield textarea{resize:vertical;min-height:54px}
+  .dfield input:focus,.dfield textarea:focus,.status:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+  .status{border:1px solid var(--line);border-radius:10px;padding:9px 11px;font-family:inherit;font-size:.9rem;
+    background:var(--surface);font-weight:650;color:var(--ink2);cursor:pointer}
 
-  /* Details disclosure (supporting explanation, kept out of the way) */
-  .disc{margin:0 0 10px;border:1px solid var(--line);border-radius:10px;background:#fbfdff;overflow:hidden}
-  .disc>summary{cursor:pointer;list-style:none;padding:8px 12px;font-size:.8rem;font-weight:700;
-    color:var(--sky-deep);display:flex;align-items:center;gap:7px}
+  /* card groups */
+  .gcard{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);border:1px solid var(--line);padding:16px;margin:0 0 14px}
+  .gcard .ghead{display:flex;justify-content:space-between;gap:10px;margin-bottom:10px}
+  .gcard .ghead h3{margin:0;font-size:1.05rem;font-weight:700}
+  .pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+  .pill{font-size:.7rem;font-weight:700;background:#eef3f9;color:var(--ink2);border-radius:99px;padding:3px 9px}
+  .pill.amount{background:var(--good-soft);color:#1a7f37}
+  .gcard .tasks{margin-top:4px}
+  .gactions{margin-top:12px}
+
+  /* disclosure */
+  .disc{margin:8px 0}
+  .disc>summary{cursor:pointer;list-style:none;font-size:.85rem;font-weight:700;color:var(--accent-deep);
+    display:flex;align-items:center;gap:7px;padding:4px 0}
   .disc>summary::-webkit-details-marker{display:none}
-  .disc>summary::before{content:"▸";font-size:.7rem;transition:transform .15s}
+  .disc>summary::before{content:"›";font-size:1.15rem;transition:transform .15s;line-height:1}
   .disc[open]>summary::before{transform:rotate(90deg)}
-  .disc .body{padding:0 12px 11px;font-size:.86rem;color:#475569}
-  .disc .body p{margin:6px 0}
-  .disc .body .links{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+  .disc .body{padding:6px 0 4px;font-size:.9rem;color:var(--ink2)}
+  .disc .body p{margin:7px 0}
+  .approach{margin:8px 0 0;padding:11px 13px;background:#f6f9fc;border-radius:12px}
+  .approach .t{font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  .approach ul{margin:6px 0 0;padding-left:18px}
+  .approach li{margin:4px 0}
 
-  /* Card groups (scholarship / school sub-lists) */
-  .group{margin:14px 0 6px}
-  .group .ghead{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 6px}
-  .group .ghead h3{margin:0;font-size:.95rem}
-  .pill{font-size:.72rem;background:#eef4fb;color:var(--sky-deep);border-radius:99px;padding:2px 8px;font-weight:700}
-  .pill.amount{background:#fff4e1;color:var(--sun-deep)}
-
-  .approach{margin:8px 0 0;padding:9px 11px;background:#f4f8fc;border-radius:10px}
-  .approach .t{font-size:.74rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
-  .approach ul{margin:5px 0 0;padding-left:18px;font-size:.86rem;color:#475569}
-  .approach li{margin:3px 0}
-  .why b{color:var(--ink)}
-
-  .linkbtn{text-decoration:none;font-size:.78rem;font-weight:700;color:#fff;
-    background:var(--sky);padding:6px 11px;border-radius:99px;display:inline-flex;align-items:center;gap:5px}
-  .linkbtn:active{background:var(--sky-deep)}
-
-  /* Compact task rows */
-  .tasks{display:flex;flex-direction:column;gap:6px}
-  .empty{padding:18px 12px;text-align:center;color:var(--muted);font-size:.86rem;
-    border:1px dashed var(--line);border-radius:11px;background:#fbfdff}
-  .trow{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;min-height:56px;padding:8px 12px;background:#fff;
-    border:1px solid var(--line);border-radius:11px;transition:background .15s,border-color .15s}
-  .trow.done{background:#f6fdf8;border-color:#cdeed6}
-  .trow[data-status="In progress"]{border-color:#fde68a;background:#fffdf6}
-  .cb{appearance:none;-webkit-appearance:none;width:22px;height:22px;flex:0 0 auto;
-    border:2px solid var(--sky);border-radius:7px;cursor:pointer;position:relative;background:#fff;transition:.15s}
-  .cb:checked{background:var(--good);border-color:var(--good)}
-  .cb:checked::after{content:"✓";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-    color:#fff;font-size:13px;font-weight:900}
-  .ttitle{flex:1;min-width:0;font-size:.92rem;font-weight:600;line-height:1.3}
-  .ttitle .sectag{display:block;font-size:.68rem;font-weight:700;color:var(--sky-deep);
-    text-transform:uppercase;letter-spacing:.03em;margin-bottom:1px}
-  .trow.done .ttitle{text-decoration:line-through;color:var(--muted)}
-  .trow.done .ttitle .sectag{text-decoration:none}
-  .tctrls{display:flex;align-items:center;gap:6px;flex:0 0 auto}
-  .status{font-size:.74rem;font-weight:700;border:1px solid var(--line);border-radius:99px;
-    padding:5px 8px;background:#fff;cursor:pointer;color:var(--ink);font-family:inherit}
-  .status[data-s="In progress"]{background:#fef9e7;border-color:#fde68a;color:#92400e}
-  .status[data-s="Done"]{background:#ecfdf3;border-color:#bbf7d0;color:#166534}
-  .datewrap{position:relative;display:inline-flex}
-  .datewrap input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;border:0;padding:0}
-  .due{border:1px solid var(--line);border-radius:8px;padding:5px 7px;font-size:.74rem;font-weight:700;
-    font-family:inherit;color:var(--muted);background:#fff;cursor:pointer;white-space:nowrap}
-  .due.set{color:var(--ink)}
-  .due.due-soon{border-color:var(--sun);background:#fff7ed;color:var(--sun-deep)}
-  .due.overdue{border-color:#fca5a5;background:#fef2f2;color:#b91c1c}
-  .ic{width:30px;height:30px;flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;
-    border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer;color:var(--sky-deep);
-    font-size:.85rem;text-decoration:none;position:relative;padding:0}
-  .ic:hover{background:#f1f6fc}
-  .ic.has::after{content:"";position:absolute;top:-3px;right:-3px;width:8px;height:8px;border-radius:50%;
-    background:var(--sun);border:1.5px solid #fff}
-  .tnotes{display:none;flex:0 0 100%;width:100%}
-  .tnotes.open{display:block}
-  .tnotes textarea{width:100%;border:1px solid var(--line);border-radius:9px;padding:7px;
-    font-family:inherit;font-size:.84rem;resize:vertical;min-height:44px}
-  @media(max-width:640px){
-    .trow{flex-wrap:wrap;align-items:flex-start;gap:7px 10px;padding:9px 11px}
-    .ttitle{flex:1 1 calc(100% - 32px)}
-    .tctrls{width:100%;padding-left:32px;justify-content:flex-start;flex-wrap:wrap}
-  }
-
-  /* Field "fill me in" polish */
-  .field input::placeholder,.field textarea::placeholder,.tnotes textarea::placeholder{color:#9fb3c8}
-  .field input:placeholder-shown,.field textarea:placeholder-shown{
-    border-style:dashed;border-color:#c3dafc;background:#f7fbff}
-  .field input:focus,.field textarea:focus,.field select:focus,.tnotes textarea:focus{
-    outline:none;border-style:solid;border-color:var(--sky);box-shadow:0 0 0 3px rgba(59,130,246,.15);background:#fff}
-
-  /* Light card (used by Sim / Essay / Recs / Roadmap blocks) */
-  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
-  .card h3{margin:0 0 4px;font-size:1rem}
-  .card p.desc{margin:6px 0;font-size:.9rem;color:#475569}
+  /* generic card (sim/essay/recs/roadmap) */
+  .card{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);border:1px solid var(--line);padding:17px;margin:0 0 14px}
+  .card h3{margin:0 0 6px;font-size:1.05rem}
+  .card p.desc{margin:6px 0;font-size:.92rem;color:var(--ink2)}
   .card p.desc b{color:var(--ink)}
-
-  /* generic field */
-  .field{margin:10px 0}
-  .field label{display:block;font-size:.8rem;font-weight:700;color:var(--muted);margin-bottom:4px}
-  .field input,.field textarea,.field select{width:100%;border:1px solid var(--line);border-radius:10px;
-    padding:9px;font-family:inherit;font-size:.9rem}
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  @media(max-width:480px){.grid2{grid-template-columns:1fr}}
-
-  /* skill chips */
+  .field{margin:12px 0}
+  .field label{display:block;font-size:.78rem;font-weight:700;color:var(--muted);margin-bottom:5px}
+  .field input,.field textarea,.field select{width:100%;border:1px solid var(--line);border-radius:11px;padding:11px;
+    font-family:inherit;font-size:.92rem;background:var(--surface)}
+  .field input:focus,.field textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+  .field input::placeholder,.field textarea::placeholder{color:#9fb0c2}
+  .field input:placeholder-shown,.field textarea:placeholder-shown{border-style:dashed;border-color:#cfe0f5}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:520px){.grid2{grid-template-columns:1fr}}
   .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-  .chip{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:99px;
-    padding:7px 12px;font-size:.85rem;cursor:pointer;background:#fff;user-select:none;font-weight:600}
+  .chip{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:99px;padding:8px 13px;
+    font-size:.86rem;cursor:pointer;background:var(--surface);user-select:none;font-weight:600}
   .chip input{accent-color:var(--good);width:16px;height:16px}
-  .chip.on{background:#ecfdf3;border-color:#bbf7d0;color:#166534}
+  .chip.on{background:var(--good-soft);border-color:#bdeccb;color:#1a7f37}
+  .banner{background:#fff8ec;border:1px solid #ffe6bd;border-radius:12px;padding:12px 14px;margin:14px 0 0;font-size:.88rem;color:#8a5a00}
+  .banner strong{color:#704700}
+  .phase{border-left:2px solid var(--accent);padding:2px 0 2px 14px;margin:0 0 16px}
+  .phase .when{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  .phase h4{margin:2px 0 4px;font-size:1rem;color:var(--accent-deep)}
+  .phase ul{margin:0;padding-left:18px;font-size:.92rem;color:var(--ink2)}
+  .phase li{margin:4px 0}
+  .rec{border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px;background:var(--surface);position:relative}
+  .rec .rm{position:absolute;top:10px;right:10px;background:#fff0ef;color:var(--danger);border:1px solid #ffd6d2;
+    border-radius:9px;width:28px;height:28px;cursor:pointer;font-weight:800}
+  .addbtn{width:100%;border:1px dashed #b9d3f2;background:var(--accent-soft);color:var(--accent-deep);
+    border-radius:12px;padding:12px;font-weight:700;cursor:pointer;font-size:.92rem}
+  .hint{font-size:.82rem;color:var(--muted);margin:5px 0 0}
 
-  /* roadmap */
-  .phase{border-left:3px solid var(--sky);padding:2px 0 2px 14px;margin:0 0 16px}
-  .phase h4{margin:0 0 2px;font-size:1rem;color:var(--sky-deep)}
-  .phase .when{font-size:.75rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
-  .phase ul{margin:6px 0 0;padding-left:18px;font-size:.9rem;color:#475569}
-  .phase li{margin:3px 0}
+  /* footer + utility */
+  footer{margin:34px 0 0;padding:18px 0 10px;text-align:center;color:var(--muted);font-size:.82rem;border-top:1px solid var(--line)}
+  footer .futil{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:10px}
+  .ctl{border:1px solid var(--line);background:var(--surface);color:var(--ink2);border-radius:11px;padding:9px 14px;
+    font-size:.84rem;font-weight:650;cursor:pointer;font-family:inherit}
+  .ctl:hover{background:#fff}
+  .ctl.danger{color:var(--danger);border-color:#ffd6d2;background:#fff5f4}
+  .syncbadge{display:inline-flex;align-items:center;gap:7px;font-size:.78rem;font-weight:600;color:var(--muted);justify-content:center}
+  .syncbadge .dot{width:8px;height:8px;border-radius:50%;background:#cbd5e1}
+  .syncbadge.on .dot{background:var(--good);box-shadow:0 0 0 3px rgba(52,199,89,.16)}
+  .syncbadge.err .dot{background:var(--warn)}
 
-  /* rec rows */
-  .rec{border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px;background:#fff;position:relative}
-  .rec .rm{position:absolute;top:8px;right:8px;background:#fef2f2;color:#b91c1c;border:1px solid #fecaca;
-    border-radius:8px;width:26px;height:26px;cursor:pointer;font-weight:800}
-  .addbtn{width:100%;border:1px dashed var(--sky);background:#f0f7ff;color:var(--sky-deep);
-    border-radius:12px;padding:11px;font-weight:700;cursor:pointer;font-size:.9rem}
-  .hint{font-size:.8rem;color:var(--muted);margin:4px 0 0}
-
-  footer{text-align:center;color:var(--muted);font-size:.8rem;margin-top:40px;padding-top:16px;border-top:1px solid var(--line)}
-
-  .saved-flash{position:fixed;bottom:16px;left:50%;transform:translateX(-50%) translateY(60px);
-    background:var(--ink);color:#fff;padding:9px 16px;border-radius:99px;font-size:.82rem;font-weight:600;
-    opacity:0;transition:.3s;z-index:50;box-shadow:0 6px 18px rgba(0,0,0,.2)}
+  .saved-flash{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(40px);background:var(--ink);
+    color:#fff;padding:9px 16px;border-radius:99px;font-size:.82rem;font-weight:600;opacity:0;transition:.3s;z-index:60;
+    box-shadow:0 8px 24px rgba(0,0,0,.25)}
   .saved-flash.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-  /* Print */
+  /* bottom nav + sheet (mobile only) */
+  .bottomnav{display:none}
+  .sheet{display:none}
+
+  @media(max-width:820px){
+    .sidebar{display:none}
+    .layout{gap:0;padding:0 16px}
+    .content{padding:20px 0 30px;max-width:none}
+    .sechead h2{font-size:1.42rem}
+    .topbar .bar{padding:11px 16px}
+    .titles .sub{display:none}
+    footer{margin-bottom:96px}
+    .bottomnav{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:45;background:rgba(255,255,255,.9);
+      backdrop-filter:saturate(180%) blur(16px);-webkit-backdrop-filter:saturate(180%) blur(16px);
+      border-top:1px solid var(--line);padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
+    .bottomnav button{flex:1;border:none;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;
+      gap:3px;padding:6px 2px;border-radius:10px;color:var(--muted);font-size:.64rem;font-weight:700;font-family:inherit}
+    .bottomnav button .nicon{font-size:1.15rem;line-height:1}
+    .bottomnav button.active{color:var(--accent-deep)}
+    .saved-flash{bottom:84px}
+    .sheet{display:block;position:fixed;inset:0;z-index:50;background:rgba(15,30,50,.35);opacity:0;pointer-events:none;transition:opacity .2s}
+    .sheet.open{opacity:1;pointer-events:auto}
+    .sheetcard{position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-radius:22px 22px 0 0;
+      padding:8px 14px calc(20px + env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .25s}
+    .sheet.open .sheetcard{transform:none}
+    .sheethandle{width:40px;height:5px;border-radius:99px;background:#d7dee7;margin:8px auto 12px}
+    #moreList .navitem{font-size:1rem;padding:13px 12px}
+  }
+
   @media print{
+    .topbar,.sidebar,.bottomnav,.sheet,.iconbtn,.searchrow,.chev,.gactions,.factions,footer .futil,.addbtn,.rec .rm{display:none!important}
     body{background:#fff}
-    .topbar,.callout,.saved-flash,.ic,.addbtn,.rec .rm,footer .ctl{display:none!important}
-    .tnotes.open{display:block!important}
-    .disc{border:none;background:none;margin:4px 0}
-    .disc>summary{display:none}
-    .disc[open] .body{padding:0}
-    .trow,.card{box-shadow:none;break-inside:avoid;border-color:#cbd5e1}
-    .sec-head h2{font-size:1.1rem}
+    .layout{display:block}
+    .trow,.gcard,.card,.feature{box-shadow:none;border:1px solid #d4dde7;break-inside:avoid}
+    .tdrawer{display:block!important;border-top:1px solid #e3eaf2}
+    .disc .body{display:block!important}
     a[href]{color:var(--ink);text-decoration:underline}
   }
 </style>
 </head>
 <body>
-<div class="wrap">
+<header class="topbar">
+  <div class="bar">
+    <div class="titles"><h1>Flight School Path</h1><p class="sub">From flight sim to real flight training</p></div>
+    <button class="iconbtn" onclick="toggleSearch()" aria-label="Search">🔎</button>
+    <div class="pc" title="Overall progress">
+      <svg class="ring" viewBox="0 0 36 36"><circle class="ring-bg" cx="18" cy="18" r="15.9155"/><circle class="ring-fg" id="ringFg" cx="18" cy="18" r="15.9155"/></svg>
+      <div class="pctext"><b id="overallPct">0%</b><span id="overallCount">0/0</span></div>
+    </div>
+  </div>
+  <div class="searchrow" id="searchRow"><input id="searchInput" placeholder="Search tasks in this section" oninput="onSearch(this.value)" /></div>
+</header>
 
-  <div class="topbar">
-    <header class="hero">
-      <span class="plane">🛩️</span>
-      <div class="titles">
-        <h1>Flight School Path</h1>
-        <p class="sub">From flight sim to real flight training</p>
+<div class="layout">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="content">
+    <div id="app"></div>
+    <footer>
+      <div class="futil">
+        <button class="ctl" onclick="printAll()">🖨 Print checklist</button>
+        <button class="ctl danger" onclick="resetAll()">↺ Reset all</button>
       </div>
-      <div class="pc">
-        <span class="pnum" id="overallCount">0/0</span>
-        <div class="pbar"><span id="overallBar"></span></div>
-        <span class="ppct" id="overallPct">0%</span>
-      </div>
-    </header>
-
-    <nav class="jump" id="jumpNav"></nav>
-
-    <div class="controls">
-      <label class="search">🔎<input id="searchInput" placeholder="Search tasks…" oninput="onSearch(this.value)" /></label>
-      <select class="ctl" id="filterSel" onchange="setFilter(this.value)" aria-label="Filter tasks">
-        <option value="all">All</option>
-        <option value="Not started">Not started</option>
-        <option value="In progress">In progress</option>
-        <option value="Done">Done</option>
-      </select>
-      <button class="ctl" id="sortBtn" onclick="toggleSort()" title="Sort by due date">↕ Due</button>
-      <button class="ctl" id="collapseBtn" onclick="toggleCollapse()">Hide done</button>
-      <button class="ctl" id="next5Btn" onclick="toggleNext5()">★ Next 5</button>
       <div class="syncbadge" id="syncBadge"><span class="dot"></span><span id="syncText">Saved on this device</span></div>
-    </div>
-  </div>
-
-  <div id="simCallout" class="callout">
-    <span>🛩️</span>
-    <div><strong>Sim hours = self-directed study,</strong> not logged flight time — it shows commitment and
-      discipline, but doesn't replace real instruction or FAA hours.</div>
-    <button class="x" onclick="dismissCallout()" aria-label="Dismiss">✕</button>
-  </div>
-
-  <main id="app"></main>
-
-  <footer>
-    <div style="margin-bottom:8px;display:flex;gap:7px;justify-content:center;flex-wrap:wrap">
-      <button class="ctl" onclick="printAll()">🖨 Print checklist</button>
-      <button class="ctl danger" onclick="resetAll()">↺ Reset all</button>
-    </div>
-    Progress saves automatically · One step at a time ✈️
-  </footer>
+      <div style="margin-top:8px">You don't need to finish everything today · One step at a time ✈️</div>
+    </footer>
+  </main>
 </div>
 
+<nav class="bottomnav" id="bottomnav"></nav>
+<div class="sheet" id="moreSheet" onclick="if(event.target===this)closeMore()">
+  <div class="sheetcard"><div class="sheethandle"></div><div id="moreList"></div></div>
+</div>
 <div class="saved-flash" id="flash">Saved</div>
 
 <script>
@@ -314,28 +299,34 @@ const SECTIONS = [
   {
     id:"start", ico:"🚀", title:"Start Here",
     sub:"The core checklist. Knock these out and the rest gets easier.",
-    links:[
-      {label:"FAFSA", url:"https://studentaid.gov/h/apply-for-aid/fafsa"},
-      {label:"IACRA", url:"https://iacra.faa.gov/"},
-      {label:"FAA Medical", url:"https://www.faa.gov/pilots/medical_certification"},
-      {label:"AOPA", url:"https://www.aopa.org/"},
-      {label:"EAA", url:"https://www.eaa.org/"}
-    ],
     items:[
-      {t:"Create FAFSA account", link:"https://studentaid.gov/h/apply-for-aid/fafsa"},
-      {t:"Submit FAFSA", link:"https://studentaid.gov/h/apply-for-aid/fafsa"},
-      {t:"Apply to 2–3 North Carolina aviation community college programs"},
-      {t:"Join AOPA", link:"https://www.aopa.org/"},
-      {t:"Join EAA", link:"https://www.eaa.org/"},
-      {t:"Find nearest EAA chapter", link:"https://www.eaa.org/eaa/eaa-chapters/find-an-eaa-chapter"},
-      {t:"Schedule one discovery flight"},
-      {t:"Apply for FAA student pilot certificate through IACRA", link:"https://iacra.faa.gov/"},
-      {t:"Complete FAA MedXPress form", link:"https://medxpress.faa.gov/"},
-      {t:"Schedule FAA medical exam with AME", link:"https://www.faa.gov/pilots/amelocator"},
+      {t:"Create FAFSA account", link:"https://studentaid.gov/h/apply-for-aid/fafsa", p:"first",
+        need:"An email and an FSA ID (username + password) from StudentAid.gov."},
+      {t:"Submit FAFSA", link:"https://studentaid.gov/h/apply-for-aid/fafsa", p:"first",
+        why:"This unlocks Pell Grants, school aid, and federal loans — the money that makes everything else possible.",
+        need:"Your FSA ID, tax info, and a list of schools to send it to."},
+      {t:"Apply to 2–3 North Carolina aviation community college programs", p:"first",
+        why:"Community college is the lowest-cost way in, and it connects you to grants and scholarships.",
+        need:"A high school transcript and each school's online application."},
+      {t:"Join AOPA", link:"https://www.aopa.org/", p:"first",
+        why:"Free student membership — and it's required for AOPA scholarships."},
+      {t:"Join EAA", link:"https://www.eaa.org/", p:"first",
+        why:"Opens EAA scholarships and local chapter support."},
+      {t:"Find nearest EAA chapter", link:"https://www.eaa.org/eaa/eaa-chapters/find-an-eaa-chapter", p:"later",
+        why:"Local chapters can mentor you and offer the Ray scholarship."},
+      {t:"Schedule one discovery flight",
+        why:"One real flight shows commitment — and can lead to a recommendation letter for scholarships.",
+        need:"Call a local flight school; usually $100–200 for a 30–60 min intro flight."},
+      {t:"Apply for FAA student pilot certificate through IACRA", link:"https://iacra.faa.gov/",
+        need:"An IACRA account; an instructor or examiner validates the application."},
+      {t:"Complete FAA MedXPress form", link:"https://medxpress.faa.gov/",
+        need:"Fill out the FAA MedXPress form online before your medical exam."},
+      {t:"Schedule FAA medical exam with AME", link:"https://www.faa.gov/pilots/amelocator",
+        need:"Book with an FAA-authorized Aviation Medical Examiner (AME)."},
       {t:"Create one-page aviation resume"},
       {t:"Ask for two recommendation letters"},
       {t:"Write scholarship essay draft"},
-      {t:"Track simulator hours and skills practiced"}
+      {t:"Track simulator hours and skills practiced", p:"later"}
     ]
   },
   {
@@ -503,6 +494,42 @@ const SECTIONS = [
   }
 ];
 
+/* Featured "Next up" cards (map to real Start tasks) */
+const FEATURED = [
+  {id:"start.i1", title:"Submit FAFSA",
+    why:"This one unlocks Pell Grants, school aid, and federal loans — the money that makes everything else possible.",
+    primary:{label:"Start FAFSA", url:"https://studentaid.gov/h/apply-for-aid/fafsa"}},
+  {id:"start.i2", title:"Apply to NC aviation schools",
+    why:"Community college is the lowest-cost way in, and it connects you to grants and scholarships.",
+    primary:{label:"Compare schools", goto:"schools"}},
+  {id:"start.i6", title:"Schedule a discovery flight",
+    why:"One real flight shows commitment — and can lead to a recommendation letter for scholarships.",
+    primary:{label:"How to book", url:"https://www.aopa.org/training-and-safety/learn-to-fly"}}
+];
+
+/* Navigation */
+const NAV = {
+  start:{icon:"🚀",label:"Start"}, grants:{icon:"💵",label:"Money"}, schools:{icon:"🎓",label:"Schools"},
+  national:{icon:"🏅",label:"Scholarships"}, sim:{icon:"🕹️",label:"Sim Tracker"}, essay:{icon:"✍️",label:"Essay"},
+  ncschol:{icon:"🌲",label:"NC Scholarships"}, recs:{icon:"📨",label:"Rec Letters"}, roadmap:{icon:"🗺️",label:"Roadmap"}
+};
+const MAIN_NAV = ["start","grants","schools","national","sim","essay"];
+const MORE_NAV = ["ncschol","recs","roadmap"];
+const BOTTOM_NAV = ["start","grants","schools","national"];
+
+/* Gentle per-section guidance */
+const GUIDE = {
+  start:"You don't need to finish everything today. Start with the first few — they unlock the rest.",
+  grants:"Free money first. FAFSA is the key that opens most of these doors.",
+  schools:"Community college is the lowest-cost way in. Compare a few, then apply.",
+  national:"These take time. Join the orgs now so you're eligible when you apply.",
+  ncschol:"Best once you're enrolled — come back after you've picked a school.",
+  sim:"Flight sim helps tell the story, but FAFSA and school applications unlock the path.",
+  essay:"One good essay adapts to every application. Draft it once, reuse it everywhere.",
+  recs:"Two strong letters. Ask early — and avoid family members.",
+  roadmap:"If you only follow one thing, follow this order."
+};
+
 const ROADMAP = [
   {when:"Phase 1 — This Week",items:["FAFSA","Apply to NC aviation schools","Join AOPA","Join EAA","Start aviation resume"]},
   {when:"Phase 2 — This Month",items:["Discovery flight","FAA student pilot certificate","FAA medical","Recommendation letters","AOPA scholarship application"]},
@@ -515,22 +542,11 @@ const SIM_SKILLS = ["Checklists","Traffic patterns","Takeoffs and landings","VFR
 
 const REC_ROLES = "Teacher · Manager · Coach · Mentor · Flight instructor (discovery flight) · EAA chapter contact";
 
-const ENCOURAGEMENTS = [
-  "Every checkmark is a real step toward the cockpit.",
-  "You're building momentum. Keep going. ✈️",
-  "Showing up consistently is exactly what scholarships reward.",
-  "This is what self-directed pilots do. Proud of the progress.",
-  "Halfway is closer than it feels. Stay the course.",
-  "Clear skies ahead — you're doing the work."
-];
-
 /* ============================================================
-   STATE / PERSISTENCE
+   STATE / PERSISTENCE  (+ optional shared sync)
+   Paste a Supabase project URL + publishable key to sync the
+   board across devices. Leave blank to stay local-only.
 ============================================================ */
-/* ── Shared sync (optional) ───────────────────────────────────
-   Paste a Supabase project URL + anon (public) key below to sync
-   the board across devices in real time. Leave blank to stay
-   local-only on each device. */
 const SUPABASE_URL  = "https://otxujypqagtkhicbxoox.supabase.co";
 const SUPABASE_ANON = "sb_publishable_9gfVb7pQQ2KJL3Z9C9d2wg_BUCa2T6j";
 const WORKSPACE_ID  = "flight-school-path";
@@ -566,202 +582,177 @@ function itemState(id){
 ============================================================ */
 const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const STATUSES = ["Not started","In progress","Done"];
+const MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+function fmtDate(iso){ if(!iso) return ""; const p=iso.split("-"); return MON[(+p[1])-1]+" "+(+p[2]); }
+function dayDiff(iso){ const t=new Date(); t.setHours(0,0,0,0); const d=new Date(iso+"T00:00:00"); return Math.round((d-t)/86400000); }
+function dueClass(iso,status){ if(!iso||status==="Done") return ""; const n=dayDiff(iso); return n<0?"overdue":n<=14?"due-soon":""; }
 
-// Build a flat list of every tracked item id (for progress)
 let ALL_ITEM_IDS = [];
 function buildIds(){
   ALL_ITEM_IDS = [];
-  SECTIONS.forEach(sec=>{
-    sectionItems(sec).forEach(it=>ALL_ITEM_IDS.push(it.id));
-  });
+  SECTIONS.forEach(sec=>sectionItems(sec).forEach(it=>ALL_ITEM_IDS.push(it.id)));
 }
-// returns items belonging to a section (top-level + inside cards), with stable ids
 function sectionItems(sec){
   const out=[];
   (sec.items||[]).forEach((it,i)=>out.push({...it,id:`${sec.id}.i${i}`}));
   (sec.cards||[]).forEach((card,ci)=>(card.items||[]).forEach((it,i)=>out.push({...it,id:`${sec.id}.c${ci}.i${i}`})));
   return out;
 }
+function viewSearch(list){
+  const q=ui.search.trim().toLowerCase();
+  return q ? list.filter(it=>it.t.toLowerCase().includes(q)) : list;
+}
 
 /* ============================================================
-   RENDER
+   RENDER — task rows + drawers
 ============================================================ */
-const MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-function fmtDate(iso){ if(!iso) return ""; const p=iso.split("-"); return MON[(+p[1])-1]+" "+(+p[2]); }
-function dayDiff(iso){ const t=new Date(); t.setHours(0,0,0,0); const d=new Date(iso+"T00:00:00"); return Math.round((d-t)/86400000); }
-function dueClass(iso,status){ if(!iso||status==="Done") return ""; const n=dayDiff(iso); return n<0?"overdue":n<=14?"due-soon":""; }
-
-// Compact task row. `it` = {id, t, link?, sectag?}
 function taskRow(it){
   const st=itemState(it.id);
   const done=st.status==="Done";
-  const hasNotes=(st.notes||"").trim().length>0;
-  const dcls=dueClass(st.deadline,st.status);
-  const dlabel=st.deadline?fmtDate(st.deadline):"📅";
-  const link=it.link?`<a class="ic" href="${esc(it.link)}" target="_blank" rel="noopener" title="Open link">↗</a>`:"";
-  const tag=it.sectag?`<span class="sectag">${esc(it.sectag)}</span>`:"";
-  return `<div class="trow ${done?'done':''}" data-id="${it.id}" data-status="${st.status}">
-    <input type="checkbox" class="cb" ${done?'checked':''} onchange="toggleDone('${it.id}',this.checked)" aria-label="Mark done"/>
-    <div class="ttitle">${tag}${esc(it.t)}</div>
-    <div class="tctrls">
-      <select class="status" data-s="${st.status}" onchange="setStatus('${it.id}',this.value)" aria-label="Status">
-        ${STATUSES.map(s=>`<option ${s===st.status?'selected':''}>${s}</option>`).join("")}
-      </select>
-      <span class="datewrap">
-        <span class="due ${st.deadline?'set':''} ${dcls}">${dlabel}</span>
-        <input type="date" value="${st.deadline||''}" onclick="this.showPicker&&this.showPicker()" onchange="setDeadline('${it.id}',this.value)" aria-label="Due date"/>
-      </span>
-      ${link}
-      <button class="ic ${hasNotes?'has':''}" onclick="toggleNotes('${it.id}')" title="Notes" aria-label="Notes">📝</button>
+  const open=openDrawers.has(it.id);
+  const meta=[];
+  if(st.status==="In progress") meta.push(`<span class="tdot">In progress</span>`);
+  if(st.deadline) meta.push(`<span class="duechip ${dueClass(st.deadline,st.status)}">${fmtDate(st.deadline)}</span>`);
+  const metaHTML=meta.length?`<div class="tmeta">${meta.join("")}</div>`:"";
+  return `<div class="trow ${done?'done':''} ${open?'open':''}" data-id="${it.id}">
+    <div class="trowmain">
+      <button class="check" onclick="event.stopPropagation();toggleDone('${it.id}',${!done})" aria-label="Mark done"></button>
+      <div class="tbody" onclick="toggleDrawer('${it.id}')"><div class="ttitle">${esc(it.t)}</div>${metaHTML}</div>
+      <button class="chev" onclick="toggleDrawer('${it.id}')" aria-label="Details">⌄</button>
     </div>
-    <div class="tnotes" id="n_${it.id}">
-      <textarea placeholder="Add a note…" oninput="setNotes('${it.id}',this.value)">${esc(st.notes||"")}</textarea>
-    </div>
+    <div class="tdrawer">${drawerHTML(it)}</div>
   </div>`;
 }
-
-// Apply current filter / search / collapse / sort to a list of {id,t,...}
-function viewTasks(list){
-  const q=ui.search.trim().toLowerCase();
-  let r=list.filter(it=>{
-    const st=itemState(it.id);
-    if(q && !it.t.toLowerCase().includes(q)) return false;
-    if(ui.filter!=="all" && st.status!==ui.filter) return false;
-    if(ui.collapseDone && st.status==="Done" && ui.filter!=="Done") return false;
-    return true;
-  });
-  if(ui.sortDue){
-    r=r.map((it,i)=>({it,i})).sort((a,b)=>{
-      const da=itemState(a.it.id).deadline||"", db=itemState(b.it.id).deadline||"";
-      if(da&&db) return da<db?-1:da>db?1:a.i-b.i;
-      if(da) return -1; if(db) return 1; return a.i-b.i;
-    }).map(x=>x.it);
-  }
-  return r;
+function drawerHTML(it){
+  const st=itemState(it.id);
+  let h="";
+  if(it.why) h+=`<p class="dwhy">${esc(it.why)}</p>`;
+  if(it.need) h+=`<p class="dneed"><b>What you need:</b> ${esc(it.need)}</p>`;
+  h+=`<div class="drow">`;
+  if(it.link) h+=`<a class="btn primary" href="${esc(it.link)}" target="_blank" rel="noopener">Open link ↗</a>`;
+  h+=`<select class="status" onchange="setStatus('${it.id}',this.value)" aria-label="Status">${STATUSES.map(s=>`<option ${s===st.status?'selected':''}>${s}</option>`).join("")}</select></div>`;
+  h+=`<div class="dfield"><label>Deadline</label><input type="date" value="${st.deadline||''}" onchange="setDeadline('${it.id}',this.value)"/></div>`;
+  h+=`<div class="dfield"><label>Notes</label><textarea placeholder="Add a note…" oninput="setNotes('${it.id}',this.value)">${esc(st.notes||"")}</textarea></div>`;
+  return h;
 }
-function tasksOrEmpty(list, originalCount){
-  if(!list.length) return `<div class="empty">${originalCount?"No tasks match the current filter or search.":"No tasks here yet."}</div>`;
+function tasksOrEmpty(list,count){
+  if(!list.length) return `<div class="empty">${count?"No matching tasks.":"No tasks here yet."}</div>`;
   return `<div class="tasks">${list.map(taskRow).join("")}</div>`;
 }
-function discHTML(label, inner){
+function groupBlock(label,list,cls){
+  return `<div class="pgroup ${cls}"><div class="plabel">${esc(label)}</div><div class="tasks">${list.map(taskRow).join("")}</div></div>`;
+}
+function collapsibleTasks(label,list){
+  return `<details class="disc"><summary>${esc(label)}</summary><div class="body"><div class="tasks">${list.map(taskRow).join("")}</div></div></details>`;
+}
+function discHTML(label,inner){
   return `<details class="disc"><summary>${esc(label)}</summary><div class="body">${inner}</div></details>`;
 }
 
-function sectionProgress(sec){
-  const ids=sectionItems(sec).map(i=>i.id);
-  const total=ids.length;
-  const done=ids.filter(id=>itemState(id).status==="Done").length;
-  return {done,total};
+/* Top-level checklist with First / Next / Later / Completed grouping */
+function checklistHTML(sec){
+  const all=sec.items.map((it,i)=>({...it,id:`${sec.id}.i${i}`}));
+  if(ui.search.trim()) return tasksOrEmpty(viewSearch(all), all.length);
+  const open=all.filter(it=>itemState(it.id).status!=="Done");
+  const done=all.filter(it=>itemState(it.id).status==="Done");
+  const first=open.filter(it=>it.p==="first");
+  const later=open.filter(it=>it.p==="later");
+  const next=open.filter(it=>!it.p||it.p==="next");
+  let h="";
+  if(!all.length) return `<div class="empty">No tasks here yet.</div>`;
+  if(!open.length) h+=`<div class="empty">🎉 Every task here is done.</div>`;
+  const named = first.length>0 || later.length>0;
+  if(first.length) h+=groupBlock("Do this first",first,"first");
+  if(next.length) h+= named ? groupBlock("Next",next,"next") : `<div class="tasks">${next.map(taskRow).join("")}</div>`;
+  if(later.length) h+=collapsibleTasks("Later",later);
+  if(done.length) h+=collapsibleTasks("Completed · "+done.length,done);
+  return h;
 }
 
-// A card becomes a lightweight "group": slim header + collapsible Details + task rows
+/* Card group (scholarships / schools) — quiet rows + collapsed Details */
 function groupHTML(sec,card,ci){
   const raw=(card.items||[]).map((it,i)=>({...it,id:`${sec.id}.c${ci}.i${i}`}));
-  const items=viewTasks(raw);
-  if(raw.length && !items.length) return ""; // entire group filtered out
-  const meta=(card.meta||[]).map(m=>`<span class="${m[1]}">${esc(m[0])}</span>`).join("");
+  let list=raw;
+  if(ui.search.trim()){ list=viewSearch(raw); if(!list.length) return ""; }
+  const meta=(card.meta||[]).map(m=>`<span class="pill ${/amount/.test(m[1])?'amount':''}">${esc(m[0])}</span>`).join("");
   let inner="";
   if(card.desc) inner+=`<p>${esc(card.desc)}</p>`;
-  if(card.why) inner+=`<p class="why"><b>Why it matters:</b> ${esc(card.why)}</p>`;
-  if(card.approach) inner+=`<div class="approach"><div class="t">Application approach</div><ul>${card.approach.map(a=>`<li>${esc(a)}</li>`).join("")}</ul></div>`;
-  if(card.link) inner+=`<div class="links"><a class="linkbtn" href="${esc(card.link)}" target="_blank" rel="noopener">Visit site ↗</a></div>`;
-  return `<div class="group">
-    <div class="ghead"><h3>${esc(card.h)}</h3>${meta}</div>
+  if(card.why) inner+=`<p><b>Why it matters:</b> ${esc(card.why)}</p>`;
+  if(card.approach) inner+=`<div class="approach"><div class="t">How to approach it</div><ul>${card.approach.map(a=>`<li>${esc(a)}</li>`).join("")}</ul></div>`;
+  const action = card.link?`<a class="btn ghost" href="${esc(card.link)}" target="_blank" rel="noopener">Visit site ↗</a>`:"";
+  return `<div class="gcard">
+    <div class="ghead"><div><h3>${esc(card.h)}</h3>${meta?`<div class="pills">${meta}</div>`:""}</div></div>
     ${inner?discHTML("Details",inner):""}
-    <div class="tasks">${items.map(taskRow).join("")}</div>
+    <div class="tasks">${list.map(taskRow).join("")}</div>
+    ${action?`<div class="gactions">${action}</div>`:""}
+  </div>`;
+}
+
+/* "Next up" featured area (Start only) */
+function featuredHTML(){
+  const cards=FEATURED.map(f=>{
+    const st=itemState(f.id), done=st.status==="Done";
+    const primary = f.primary.url
+      ? `<a class="btn primary" href="${esc(f.primary.url)}" target="_blank" rel="noopener">${esc(f.primary.label)} ↗</a>`
+      : `<button class="btn primary" onclick="selectTab('${f.primary.goto}')">${esc(f.primary.label)} →</button>`;
+    return `<div class="feature ${done?'done':''}">
+      <div class="fhead">
+        <button class="check ${done?'on':''}" onclick="toggleDone('${f.id}',${!done})" aria-label="Mark done"></button>
+        <span class="prio">Do this first</span>
+        ${done?'<span class="donetag">Done</span>':''}
+      </div>
+      <h3>${esc(f.title)}</h3>
+      <p class="fwhy">${esc(f.why)}</p>
+      <div class="factions">${primary}</div>
+    </div>`;
+  }).join("");
+  return `<div class="nextup">
+    <div class="nuhead"><h2>Next up</h2><p>Start here. These three unlock everything else.</p></div>
+    <div class="features">${cards}</div>
   </div>`;
 }
 
 function sectionHTML(sec){
-  const p=sectionProgress(sec);
-  const pct=p.total?Math.round(p.done/p.total*100):0;
-  const cnt = p.total?`<span class="cnt">${p.done}/${p.total}</span>
-     <div class="bar minibar"><span style="width:${pct}%"></span></div>`:"";
-  let body=`<div class="sec-head"><h2>${sec.ico} ${esc(sec.title)}</h2>${cnt}</div>`;
-
-  // Supporting explanation -> collapsed Details (kept out of the way, above tasks)
-  let secInner="";
-  if(sec.sub) secInner+=`<p>${esc(sec.sub)}</p>`;
-  if(sec.links) secInner+=`<div class="links">`+sec.links.map(l=>`<a class="linkbtn" href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)} ↗</a>`).join("")+`</div>`;
-  if(secInner) body+=discHTML("Details & resources", secInner);
-
-  // top-level checklist (Start Here)
-  if(sec.items && !sec.custom){
-    body+=tasksOrEmpty(viewTasks(sec.items.map((it,i)=>({...it,id:`${sec.id}.i${i}`}))), sec.items.length);
-  }
-  if(sec.cards){ body+=sec.cards.map((c,ci)=>groupHTML(sec,c,ci)).join(""); }
+  const label=NAV[sec.id]?NAV[sec.id].label:sec.title;
+  const g=GUIDE[sec.id]||sec.sub||"";
+  let body=`<div class="sechead"><h2>${esc(label)}</h2>${g?`<p class="guide">${esc(g)}</p>`:""}</div>`;
+  if(sec.id==="start") body+=featuredHTML();
+  if(sec.items && !sec.custom) body+=checklistHTML(sec);
+  if(sec.cards) body+=sec.cards.map((c,ci)=>groupHTML(sec,c,ci)).join("");
   if(sec.custom==="sim") body+=simHTML();
-  if(sec.custom==="essay") body+=essayHTML(sec);
+  if(sec.custom==="essay") body+=checklistHTML(sec)+essayExtraHTML();
   if(sec.custom==="recs") body+=recsHTML();
   if(sec.custom==="roadmap") body+=roadmapHTML();
-
-  return `<section class="block" id="sec-${sec.id}">${body}</section>`;
+  return `<section class="block">${body}</section>`;
 }
 
-// "Next 5" cross-section view of the most pressing open tasks
-function allOpenTasks(){
-  const out=[];
-  SECTIONS.forEach(sec=>{
-    (sec.items||[]).forEach((it,i)=>out.push({id:`${sec.id}.i${i}`,t:it.t,link:it.link,sectag:shortTitle(sec.title)}));
-    (sec.cards||[]).forEach((c,ci)=>(c.items||[]).forEach((it,i)=>out.push({id:`${sec.id}.c${ci}.i${i}`,t:it.t,link:it.link,sectag:shortTitle(sec.title)})));
-  });
-  return out.filter(it=>itemState(it.id).status!=="Done").sort((a,b)=>{
-    const da=itemState(a.id).deadline||"", db=itemState(b.id).deadline||"";
-    if(da&&db) return da<db?-1:da>db?1:0; if(da) return -1; if(db) return 1; return 0;
-  });
-}
-function next5HTML(){
-  const list=allOpenTasks().slice(0,5);
-  const rows = list.length ? `<div class="tasks">${list.map(taskRow).join("")}</div>`
-    : `<div class="empty">🎉 Nothing open — every task is done!</div>`;
-  return `<section class="block"><div class="sec-head"><h2>★ Your next 5 tasks</h2></div>
-    <p style="font-size:.84rem;color:var(--muted);margin:0 0 10px">The most pressing open tasks across every section — earliest deadlines first.</p>
-    ${rows}</section>`;
-}
-
-/* ----- custom: simulator ----- */
+/* ----- custom blocks ----- */
 function simHTML(){
   const s=state.sim;
   const chips=SIM_SKILLS.map(skill=>{
     const on=!!s.skills[skill];
-    return `<label class="chip ${on?'on':''}">
-      <input type="checkbox" ${on?'checked':''} onchange="toggleSkill('${esc(skill)}',this.checked)"/> ${esc(skill)}</label>`;
+    return `<label class="chip ${on?'on':''}"><input type="checkbox" ${on?'checked':''} onchange="toggleSkill('${esc(skill)}',this.checked)"/> ${esc(skill)}</label>`;
   }).join("");
   return `<div class="card">
-    <p class="desc">Turn my flight sim time into a strong application story.</p>
     <div class="grid2">
-      <div class="field"><label>Simulator used</label>
-        <input value="${esc(s.used)}" placeholder="MSFS / X-Plane / other" oninput="setSim('used',this.value)"/></div>
-      <div class="field"><label>Approximate hours</label>
-        <input value="${esc(s.hours)}" placeholder="e.g. 200" oninput="setSim('hours',this.value)"/></div>
+      <div class="field"><label>Simulator used</label><input value="${esc(s.used)}" placeholder="MSFS / X-Plane / other" oninput="setSim('used',this.value)"/></div>
+      <div class="field"><label>Approximate hours</label><input value="${esc(s.hours)}" placeholder="e.g. 200" oninput="setSim('hours',this.value)"/></div>
     </div>
-    <div class="field"><label>Aircraft practiced</label>
-      <input value="${esc(s.aircraft)}" placeholder="e.g. C172, PA-28" oninput="setSim('aircraft',this.value)"/></div>
-    <div class="field"><label>Skills practiced</label>
-      <div class="chips">${chips}</div></div>
-    <div class="field"><label>Notes (screenshots / evidence optional)</label>
-      <textarea oninput="setSim('notes',this.value)" placeholder="What you practiced, milestones, links to screenshots…">${esc(s.notes)}</textarea></div>
-    <div class="banner">Use this as evidence of self-directed learning, discipline, and aviation interest.
-      <strong>Do not present it as official FAA flight time.</strong></div>
+    <div class="field"><label>Aircraft practiced</label><input value="${esc(s.aircraft)}" placeholder="e.g. C172, PA-28" oninput="setSim('aircraft',this.value)"/></div>
+    <div class="field"><label>Skills practiced</label><div class="chips">${chips}</div></div>
+    <div class="field"><label>Notes (screenshots / evidence optional)</label><textarea oninput="setSim('notes',this.value)" placeholder="What you practiced, milestones, links to screenshots…">${esc(s.notes)}</textarea></div>
+    <div class="banner">Use this as evidence of self-directed learning, discipline, and aviation interest. <strong>Don't present it as official FAA flight time.</strong></div>
   </div>`;
 }
-
-/* ----- custom: essay ----- */
-function essayHTML(sec){
-  const tasks=tasksOrEmpty(viewTasks(sec.items.map((it,i)=>({...it,id:`${sec.id}.i${i}`}))), sec.items.length);
-  return `${tasks}
-  <div class="card">
+function essayExtraHTML(){
+  return `<div class="card">
     <div class="approach"><div class="t">Core essay angle</div>
-      <p class="desc" style="margin:6px 0 0">“I didn’t grow up with access to flight training, but I found aviation
-      through simulation and taught myself as much as I could. Now I’m trying to take the responsible next step:
-      formal training through community college, FAA medical certification, and a path toward becoming a commercial pilot.”</p>
+      <p class="desc" style="margin:6px 0 0">“I didn’t grow up with access to flight training, but I found aviation through simulation and taught myself as much as I could. Now I’m trying to take the responsible next step: formal training through community college, FAA medical certification, and a path toward becoming a commercial pilot.”</p>
     </div>
     <div class="field"><label>Working essay draft (saves automatically)</label>
       <textarea style="min-height:150px" oninput="setEssay(this.value)" placeholder="Write and refine the essay here…">${esc(state.essay.draft)}</textarea></div>
   </div>`;
 }
-
-/* ----- custom: recommendations ----- */
 function recsHTML(){
   const rows=state.recs.map((r,i)=>`<div class="rec">
     <button class="rm" onclick="removeRec(${i})" title="Remove">×</button>
@@ -778,13 +769,11 @@ function recsHTML(){
   </div>`).join("");
   return `<div class="card">
     <p class="desc"><b>Good people to ask:</b> ${REC_ROLES}.</p>
-    <p class="hint" style="color:#b91c1c;font-weight:600">Avoid family members.</p>
+    <p class="hint" style="color:var(--danger);font-weight:600">Avoid family members.</p>
     ${rows}
     <button class="addbtn" onclick="addRec()">+ Add recommender</button>
   </div>`;
 }
-
-/* ----- custom: roadmap ----- */
 function roadmapHTML(){
   return `<div class="card">`+ROADMAP.map(p=>`<div class="phase">
     <div class="when">${esc(p.when.split('—')[0])}</div>
@@ -794,108 +783,73 @@ function roadmapHTML(){
 }
 
 /* ============================================================
-   PROGRESS · CONTROLS · NAV
+   PROGRESS · NAV · RENDER
 ============================================================ */
+let activeTab = localStorage.getItem("fsp.tab") || SECTIONS[0].id;
+let ui = { search:"" };
+const openDrawers = new Set();
+
 function refreshProgress(){
   const total=ALL_ITEM_IDS.length;
   const done=ALL_ITEM_IDS.filter(id=>itemState(id).status==="Done").length;
   const pct=total?Math.round(done/total*100):0;
-  document.getElementById("overallPct").textContent=pct+"%";
-  document.getElementById("overallBar").style.width=pct+"%";
-  document.getElementById("overallCount").textContent=`${done}/${total}`;
+  const ring=document.getElementById("ringFg"); if(ring) ring.style.strokeDashoffset=(100-pct);
+  const p=document.getElementById("overallPct"); if(p) p.textContent=pct+"%";
+  const c=document.getElementById("overallCount"); if(c) c.textContent=done+"/"+total;
 }
-
-/* UI preferences (per-device, not synced across the shared board) */
-const UIKEY="fsp.ui";
-let ui = loadUI();
-function loadUI(){
-  const d={filter:"all",search:"",sortDue:false,collapseDone:false,next5:false,simNote:true};
-  try{ return Object.assign(d, JSON.parse(localStorage.getItem(UIKEY))||{}); }catch(e){ return d; }
-}
-function saveUI(){ localStorage.setItem(UIKEY, JSON.stringify(ui)); }
-
-let activeTab = localStorage.getItem("fsp.tab") || SECTIONS[0].id;
-function shortTitle(t){
-  return t.replace("North Carolina","NC").replace(" Aviation Schools"," Schools")
-    .replace("Flight Simulator Experience Tracker","Sim Tracker")
-    .replace("Recommendation Letter Tracker","Rec Letters")
-    .replace("National Aviation Scholarships","National $")
-    .replace("Best Application Order","Roadmap")
-    .replace("Grants & Financial Aid","Grants");
-}
-function buildTabs(){
-  document.getElementById("jumpNav").innerHTML = SECTIONS.map(s=>
-    `<button class="tab ${(!ui.next5&&s.id===activeTab)?'active':''}" data-tab="${s.id}" onclick="selectTab('${s.id}')">${s.ico} ${esc(shortTitle(s.title))}</button>`
-  ).join("");
+function buildNav(){
+  const item=(id)=>`<button class="navitem ${id===activeTab?'active':''}" onclick="selectTab('${id}')"><span class="nicon">${NAV[id].icon}</span><span>${esc(NAV[id].label)}</span></button>`;
+  document.getElementById("sidebar").innerHTML =
+    `<div class="navgroup">${MAIN_NAV.map(item).join("")}</div>`+
+    `<div class="navlabel">More</div>`+
+    `<div class="navgroup">${MORE_NAV.map(item).join("")}</div>`;
+  const moreActive = !BOTTOM_NAV.includes(activeTab);
+  document.getElementById("bottomnav").innerHTML =
+    BOTTOM_NAV.map(id=>`<button class="${id===activeTab?'active':''}" onclick="selectTab('${id}')"><span class="nicon">${NAV[id].icon}</span>${esc(NAV[id].label)}</button>`).join("")+
+    `<button class="${moreActive?'active':''}" onclick="openMore()"><span class="nicon">•••</span>More</button>`;
+  document.getElementById("moreList").innerHTML =
+    SECTIONS.map(s=>s.id).filter(id=>!BOTTOM_NAV.includes(id)).map(item).join("");
 }
 function renderMain(){
-  document.getElementById("app").innerHTML =
-    ui.next5 ? next5HTML() : sectionHTML(SECTIONS.find(s=>s.id===activeTab));
-}
-function syncControlsUI(){
-  const f=document.getElementById("filterSel"); if(f) f.value=ui.filter;
-  const si=document.getElementById("searchInput"); if(si && si.value!==ui.search) si.value=ui.search;
-  const set=(id,on)=>{const e=document.getElementById(id); if(e) e.classList.toggle("on",on);};
-  set("sortBtn",ui.sortDue); set("collapseBtn",ui.collapseDone); set("next5Btn",ui.next5);
+  document.getElementById("app").innerHTML = sectionHTML(SECTIONS.find(s=>s.id===activeTab));
 }
 function render(){
   if(!SECTIONS.some(s=>s.id===activeTab)) activeTab=SECTIONS[0].id;
-  buildTabs(); renderMain(); refreshProgress(); syncControlsUI();
-  const c=document.getElementById("simCallout"); if(c) c.style.display = ui.simNote ? "" : "none";
+  buildNav(); renderMain(); refreshProgress();
 }
 function selectTab(id){
-  activeTab=id; ui.next5=false; localStorage.setItem("fsp.tab",id); saveUI();
-  render();
+  activeTab=id; localStorage.setItem("fsp.tab",id);
+  openDrawers.clear(); closeMore(); render();
   window.scrollTo({top:0,behavior:"smooth"});
-  const tb=document.querySelector('nav.jump .tab[data-tab="'+id+'"]');
-  if(tb) tb.scrollIntoView({inline:"center",block:"nearest",behavior:"smooth"});
 }
-
-/* Task controls */
-function onSearch(v){ ui.search=v; saveUI(); renderMain(); }
-function setFilter(v){ ui.filter=v; saveUI(); renderMain(); }
-function toggleSort(){ ui.sortDue=!ui.sortDue; saveUI(); render(); }
-function toggleCollapse(){ ui.collapseDone=!ui.collapseDone; saveUI(); render(); }
-function toggleNext5(){ ui.next5=!ui.next5; saveUI(); render(); window.scrollTo({top:0,behavior:"smooth"}); }
-function dismissCallout(){ ui.simNote=false; saveUI(); const c=document.getElementById("simCallout"); if(c) c.style.display="none"; }
-function printAll(){
-  const app=document.getElementById("app"), prev=app.innerHTML;
-  const saved={n:ui.next5,f:ui.filter,s:ui.search,c:ui.collapseDone};
-  ui.next5=false; ui.filter="all"; ui.search=""; ui.collapseDone=false;
-  app.innerHTML = SECTIONS.map(sectionHTML).join("");
-  app.querySelectorAll("details.disc").forEach(d=>d.open=true);
-  app.querySelectorAll(".tnotes").forEach(n=>{ const t=n.querySelector("textarea"); if(t&&t.value.trim()) n.classList.add("open"); });
-  window.print();
-  ui.next5=saved.n; ui.filter=saved.f; ui.search=saved.s; ui.collapseDone=saved.c;
-  app.innerHTML=prev;
+function openMore(){ document.getElementById("moreSheet").classList.add("open"); }
+function closeMore(){ document.getElementById("moreSheet").classList.remove("open"); }
+function toggleSearch(){
+  const r=document.getElementById("searchRow"); r.classList.toggle("open");
+  if(r.classList.contains("open")) document.getElementById("searchInput").focus();
+  else { document.getElementById("searchInput").value=""; if(ui.search){ ui.search=""; renderMain(); } }
+}
+function onSearch(v){ ui.search=v; renderMain(); }
+function toggleDrawer(id){
+  const row=document.querySelector('.trow[data-id="'+id+'"]');
+  if(openDrawers.has(id)){ openDrawers.delete(id); if(row) row.classList.remove("open"); }
+  else { openDrawers.add(id); if(row){ row.classList.add("open"); } }
 }
 
 /* ============================================================
    EVENT HANDLERS
 ============================================================ */
-function toggleDone(id,checked){
-  itemState(id).status = checked ? "Done" : "Not started";
-  save(); renderMain(); refreshProgress();
-}
+function toggleDone(id,checked){ itemState(id).status=checked?"Done":"Not started"; save(); renderMain(); refreshProgress(); }
 function setStatus(id,val){ itemState(id).status=val; save(); renderMain(); refreshProgress(); }
-function setNotes(id,val){ itemState(id).notes=val; save(true); debouncedFlash(); }
 function setDeadline(id,val){ itemState(id).deadline=val; save(); renderMain(); refreshProgress(); }
-function toggleNotes(id){
-  const el=document.getElementById("n_"+id); if(!el) return;
-  el.classList.toggle("open");
-  if(el.classList.contains("open")){ const ta=el.querySelector("textarea"); if(ta) ta.focus(); }
-}
+function setNotes(id,val){ itemState(id).notes=val; save(true); debouncedFlash(); }
 
 function setSim(k,v){ state.sim[k]=v; save(true); debouncedFlash(); }
-function toggleSkill(skill,on){
-  state.sim.skills[skill]=on; save();
-  event.target.closest(".chip").classList.toggle("on",on);
-}
+function toggleSkill(skill,on){ state.sim.skills[skill]=on; save(); event.target.closest(".chip").classList.toggle("on",on); }
 function setEssay(v){ state.essay.draft=v; save(true); debouncedFlash(); }
-
 function setRec(i,k,v){ state.recs[i][k]=v; save(true); debouncedFlash(); }
-function addRec(){ state.recs.push({}); save(); render(); }
-function removeRec(i){ state.recs.splice(i,1); if(!state.recs.length)state.recs.push({}); save(); render(); }
+function addRec(){ state.recs.push({}); save(); renderMain(); }
+function removeRec(i){ state.recs.splice(i,1); if(!state.recs.length)state.recs.push({}); save(); renderMain(); }
 
 let flashTimer;
 function debouncedFlash(){
@@ -906,14 +860,18 @@ function debouncedFlash(){
   },600);
 }
 
-/* ============================================================
-   TOOLBAR ACTIONS
-============================================================ */
+function printAll(){
+  const app=document.getElementById("app"), prev=app.innerHTML, q=ui.search;
+  ui.search="";
+  app.innerHTML=SECTIONS.map(sectionHTML).join("");
+  app.querySelectorAll(".trow").forEach(r=>r.classList.add("open"));
+  app.querySelectorAll("details.disc").forEach(d=>d.open=true);
+  window.print();
+  ui.search=q; app.innerHTML=prev;
+}
 function resetAll(){
   if(confirm("Reset ALL progress? This clears every checkbox, note, deadline, and saved field. This cannot be undone.")){
-    if(confirm("Are you absolutely sure?")){
-      state=blank(); save(); render();
-    }
+    if(confirm("Are you absolutely sure?")){ state=blank(); openDrawers.clear(); save(); render(); }
   }
 }
 
@@ -935,11 +893,11 @@ function pushRemote(){
     .then(({error})=>{ if(error) console.warn("sync save failed:",error.message); });
 }
 function applyRemote(incoming){
-  if(JSON.stringify(incoming)===JSON.stringify(state)) return; // ignore our own echo
+  if(JSON.stringify(incoming)===JSON.stringify(state)) return;
   state=Object.assign(blank(),incoming);
   localStorage.setItem(KEY,JSON.stringify(state));
   if(isEditingText()){ pendingRemoteRender=true; return; }
-  applyingRemote=true; render(); applyingRemote=false;
+  applyingRemote=true; renderMain(); refreshProgress(); applyingRemote=false;
 }
 async function initSync(){
   if(!SUPABASE_URL || !SUPABASE_ANON){ setSyncBadge("","Saved on this device"); return; }
@@ -951,8 +909,8 @@ async function initSync(){
     if(error) throw error;
     if(data && data.data){
       state=Object.assign(blank(),data.data); localStorage.setItem(KEY,JSON.stringify(state));
-      applyingRemote=true; render(); applyingRemote=false;
-    }else{ pushRemote(); } // seed shared board from this device
+      applyingRemote=true; renderMain(); refreshProgress(); applyingRemote=false;
+    }else{ pushRemote(); }
     sb.channel("board-"+WORKSPACE_ID)
       .on("postgres_changes",
         { event:"*", schema:"public", table:"boards", filter:"id=eq."+WORKSPACE_ID },
@@ -960,7 +918,7 @@ async function initSync(){
       .subscribe((st)=>{ if(st==="SUBSCRIBED") setSyncBadge("on","Synced — shared live"); });
     document.addEventListener("focusout", ()=>setTimeout(()=>{
       if(pendingRemoteRender && !isEditingText()){
-        pendingRemoteRender=false; applyingRemote=true; render(); applyingRemote=false;
+        pendingRemoteRender=false; applyingRemote=true; renderMain(); refreshProgress(); applyingRemote=false;
       }
     },0));
   }catch(e){
